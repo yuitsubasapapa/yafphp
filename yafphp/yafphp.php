@@ -2,11 +2,11 @@
 // +----------------------------------------------------------------------
 // | yafphp [ Yaf PHP Framework ]
 // +----------------------------------------------------------------------
-// | Copyright (c) 2007-2012 http://yodphp.com All rights reserved.
+// | Copyright (c) 2007-2013 http://yaf.zmrnet.com All rights reserved.
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
-// | Author: yodphp <yodphp@qq.com>
+// | Author: zmrnet <zmrnet@qq.com>
 // +----------------------------------------------------------------------
 
 // runtime
@@ -124,22 +124,30 @@ define('YAF_ERR_TYPE_ERROR', 521);
 echo YAF_ENVIRON;
 
 /*
+Yaf_Loader
 Yaf_Application
 Yaf_Bootstrap_Abstract
 Yaf_Dispatcher
-Yaf_Loader
+Yaf_Controller_Abstract
+Yaf_Action_Abstract
+Yaf_View_Simple
+Yaf_Plugin_Abstract
+Yaf_Registry
+Yaf_Session
+
 Yaf_Request_Abstract
 Yaf_Request_Http
 Yaf_Request_Simple
+
 Yaf_Response_Abstract
 Yaf_Response_Http
 Yaf_Response_Cli
-Yaf_Controller_Abstract
-Yaf_Action_Abstract
+
 Yaf_Config_Abstract
 Yaf_Config_Ini
 Yaf_Config_Simple
-Yaf_View_Simple
+
+
 Yaf_Router
 Yaf_Route_Static
 Yaf_Route_Simple
@@ -147,9 +155,8 @@ Yaf_Route_Supervar
 Yaf_Route_Rewrite
 Yaf_Route_Regex
 Yaf_Route_Map
-Yaf_Plugin_Abstract
-Yaf_Registry
-Yaf_Session
+
+
 Yaf_Exception
 Yaf_Exception_StartupError
 Yaf_Exception_RouterFailed
