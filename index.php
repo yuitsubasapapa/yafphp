@@ -5,7 +5,7 @@ ini_set('display_errors', 'On');
 date_default_timezone_set('Asia/Shanghai');
 
 // yafphp
-class_exists('Yaf_Application') or require(dirname(__FILE__) . '/yafphp/yaf.php');
+class_exists('Yaf_Application') or require(dirname(__FILE__) . '/yafphp/yafphp.php');
 
 define('APP_PATH',  realpath(dirname(__FILE__)));
 
