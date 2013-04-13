@@ -24,10 +24,30 @@ define('YAF_ERR_TYPE_ERROR', 521);
 defined('YAF_ENVIRON') or define('YAF_ENVIRON', 'product');
 defined('YAF_DEBUG') or define('YAF_DEBUG', false);
 
-// autoload
-require(dirname(__FILE__) . '/base/Yaf_Loader.php');
+// yafphp autoload
+spl_autoload_register(function($classname)
+{
+	if(substr($classname, 0, 4) == 'Yaf_')  // yafphp core class
+	{
+		$yafpath = new DirectoryIterator(dirname(__FILE__));
+		foreach($yafpath as $incpath)
+		{
+			if($incpath->isDir() && $incpath->isDot()===false)
+			{
+				$classpath	= $incpath->getPathname() . DIRECTORY_SEPARATOR . $classname . '.php';
+				if(is_file($classpath))
+				{
+					include($classpath);
+					break;
+				}
+			}
+		}
+	}
 
+	return class_exists($classname, false) || interface_exists($classname, false);
+});
 
+/*
 class Yafphp
 {
 	private static $_app;
@@ -110,7 +130,7 @@ class Yafphp
 //print_r(get_declared_classes());
 */
 
-
+/*
 function autoload($classname)
 {
 	$classpath = $classname;
@@ -150,4 +170,4 @@ function autoload($classname)
 
 	return class_exists($classname, false) || interface_exists($classname, false);
 }
-
+*/

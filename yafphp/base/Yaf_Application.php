@@ -1,12 +1,12 @@
 <?php
 final class Yaf_Application
 {
-	protected static $_app;
+	protected static $_app = NULL;
 
-	protected $_config;
+	protected $_config = NULL;
 	protected $_dispatcher;
-	protected $_environ;
-	protected $_modules;
+	protected $_environ = YAF_ENVIRON;
+	protected $_modules = array();
 
 	protected $_run = FALSE;
 
@@ -14,9 +14,29 @@ final class Yaf_Application
 	 * __construct
 	 *
 	 */
-	public function __construct($config, $section = NULL)
+	public function __construct($config, $section = YAF_ENVIRON)
 	{
-		
+		if(!is_null(self::$_app)){
+			throw new Yaf_Exception_StartupError('Only one application can be initialized');
+		}
+
+		if(is_string($section) && strlen($section)){
+			$this->_environ = $section;
+		}
+
+		if(is_string($config)){
+			$this->_config = new Yaf_Config_Ini($config, $section);
+		}
+		if(is_array($config)){
+			$this->_config = new Yaf_Config_Simple($config, $section);
+		}
+
+		if(is_null($this->_config)
+			|| !is_object($this->_config)
+			|| !($this->_config instanceof Yaf_Config_Abstract)
+			|| yaf_application_parse_option(zend_read_property(yaf_config_ce,
+				   	zconfig, ZEND_STRL(YAF_CONFIG_PROPERT_NAME), 1 TSRMLS_CC) TSRMLS_CC) == FAILURE)
+		self::$_app = &$this;
 	}
 
 	/**
@@ -38,39 +58,30 @@ final class Yaf_Application
 	}
 
 	/**
-	 * getDispatcher
-	 *
-	 */
-	public function getDispatcher()
-	{
-
-	}
-
-	/**
 	 * getConfig
 	 *
 	 */
 	public function getConfig()
 	{
-
+		return $this->_config;
 	}
 
 	/**
-	 * environ
+	 * getDispatcher
 	 *
 	 */
-	public function environ()
+	public function getDispatcher()
 	{
-
+		return $this->_dispatcher;
 	}
 
 	/**
-	 * environ
+	 * geModules
 	 *
 	 */
 	public function geModules()
 	{
-
+		return $this->_modules;
 	}
 
 	/**
@@ -80,6 +91,15 @@ final class Yaf_Application
 	public static function app()
 	{
 		return self::$_app;
+	}
+
+	/**
+	 * environ
+	 *
+	 */
+	public function environ()
+	{
+
 	}
 
 	/**
