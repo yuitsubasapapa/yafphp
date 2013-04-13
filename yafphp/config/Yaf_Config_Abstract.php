@@ -1,92 +1,168 @@
 <?php
 abstract class Yaf_Config_Abstract implements Iterator, ArrayAccess, Countable
 {
+	// array _config
 	protected $_config = array();
+	// boolean _readonly
 	protected $_readonly = TRUE;
 
-	public function get($name)
+	/**
+	 * __get
+	 *
+	 */
+	public function __get($name)
 	{
-
+		return $this->get($name);
 	}
 
-	public function __get ( $name )
+	/**
+	 * __set
+	 *
+	 */
+	public function __set($name, $value)
 	{
-
+		return $this->set($name, $value);
 	}
 
-	public function __isset ( $name )
+	/**
+	 * __isset
+	 *
+	 */
+	public function __isset($name)
 	{
-
+		return isset($this->_config[$name]);
 	}
 
-	public function __set ($name, $value )
+	/**
+	 * get
+	 *
+	 */
+	public function get($name = NULL)
 	{
+		if(is_null($name)) return $this;
 
+		if(isset($this->_config[$name]))
+			return $this->_config[$name];
+		
 	}
 
-	public function set ($name, $value )
+	/**
+	 * set
+	 *
+	 */
+	public function set($name, $value)
 	{
-
+		if(!$this->_readonly)
+			$this->_config[$name] = $value;
 	}
 
-	public function count ()
+	/**
+	 * Countable::count
+	 *
+	 */
+	public function count()
 	{
-
+		return count($this->_config);
 	}
 
-	public function offsetGet ( $name )
+	/**
+	 * ArrayAccess::offsetExists
+	 *
+	 */
+	public function offsetExists($name)
 	{
-
+		return $this->__isset($name);
 	}
 
-	public function offsetSet ($name, $value )
+	/**
+	 * ArrayAccess:: offsetGet
+	 *
+	 */
+	public function offsetGet($name)
 	{
-
+		return $this->get($name);
 	}
 
-	public function offsetExists ($name )
+	/**
+	 * ArrayAccess:: offsetSet
+	 *
+	 */
+	public function offsetSet($name, $value)
 	{
-
+		return $this->set($name, $value);
 	}
 
-	public function offsetUnset ($name )
+	/**
+	 * ArrayAccess:: offsetUnset
+	 *
+	 */
+	public function offsetUnset($name)
 	{
-
+		if(!$this->_readonly)
+			unset($this->_config[$name]);
 	}
 
-	public function rewind ()
+	/**
+	 * Iterator::current
+	 *
+	 */
+	public function current()
 	{
-
+		return current($this->_config);
 	}
 
-	public function key ()
+	/**
+	 * Iterator::key
+	 *
+	 */
+	public function key()
 	{
-
+ 		return key($this->_config);
 	}
 
-	public function next ()
+	/**
+	 * Iterator::next
+	 *
+	 */
+	public function next()
 	{
-
+		next($this->_config);
 	}
 
-	public function current ()
+	/**
+	 * Iterator::rewind
+	 *
+	 */
+	public function rewind()
 	{
-
+		reset($this->_config);
 	}
 
-	public function valid ()
+	/**
+	 * Iterator::valid
+	 *
+	 */
+	public function valid()
 	{
-
+		return (current($this->_config) !== false);
 	}
 
-	public function toArray ()
+	/**
+	 * toArray
+	 *
+	 */
+	public function toArray()
 	{
-
+		return $this->_config;
 	}
 
-	public function readOnly ()
+	/**
+	 * readOnly
+	 *
+	 */
+	public function readOnly()
 	{
-
+		return $this->_readonly;
 	}
 
 }

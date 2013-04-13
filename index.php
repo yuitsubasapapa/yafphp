@@ -13,3 +13,8 @@ define('APP_PATH',  realpath(dirname(__FILE__)));
 $config = APP_PATH . '/conf/app.ini';
 $yafapp  = new Yaf_Application($config);
 $yafapp->bootstrap()->run();
+
+echo '<pre>';
+$config = $yafapp->getConfig();
+print_r($config);
+print_r($config->get('base.database.master.host'));

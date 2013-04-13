@@ -17,7 +17,9 @@ final class Yaf_Application
 	public function __construct($config, $section = YAF_ENVIRON)
 	{
 		if(!is_null(self::$_app)){
+			unset($this);
 			throw new Yaf_Exception_StartupError('Only one application can be initialized');
+			return;
 		}
 
 		if(is_string($section) && strlen($section)){
@@ -28,14 +30,18 @@ final class Yaf_Application
 			$this->_config = new Yaf_Config_Ini($config, $section);
 		}
 		if(is_array($config)){
-			$this->_config = new Yaf_Config_Simple($config, $section);
+			$this->_config = new Yaf_Config_Simple($config, true);
 		}
 
-		if(is_null($this->_config)
-			|| !is_object($this->_config)
-			|| !($this->_config instanceof Yaf_Config_Abstract)
-			|| yaf_application_parse_option(zend_read_property(yaf_config_ce,
-				   	zconfig, ZEND_STRL(YAF_CONFIG_PROPERT_NAME), 1 TSRMLS_CC) TSRMLS_CC) == FAILURE)
+		if 	(is_null($this->_config)
+				|| !is_object($this->_config)
+				|| !($this->_config instanceof Yaf_Config_Abstract)
+				|| self::_parse_option($this->_config) == FALSE){
+			unset($this);
+			throw new Yaf_Exception_StartupError('Initialization of application config failed');
+			return;
+		}
+
 		self::$_app = &$this;
 	}
 
@@ -110,6 +116,13 @@ final class Yaf_Application
 	{
 
 	}
+
+	private static function _parse_option($config){
+
+		return TRUE;
+		return FALSE;
+	}
+
 /*
 	public function __construct($config)
 	{
