@@ -25,7 +25,7 @@ defined('YAF_ENVIRON') or define('YAF_ENVIRON', 'product');
 defined('YAF_DEBUG') or define('YAF_DEBUG', false);
 
 // yafphp autoload
-spl_autoload_register(function($classname)
+function __autoload($classname)
 {
 	if(substr($classname, 0, 4) == 'Yaf_')  // yafphp core class
 	{
@@ -45,7 +45,9 @@ spl_autoload_register(function($classname)
 	}
 
 	return class_exists($classname, false) || interface_exists($classname, false);
-});
+}
+
+spl_autoload_register('__autoload');
 
 /*
 class Yafphp
