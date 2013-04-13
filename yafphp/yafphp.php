@@ -2,7 +2,7 @@
 // +----------------------------------------------------------------------
 // | yafphp [ Yaf PHP Framework ]
 // +----------------------------------------------------------------------
-// | Copyright (c) 2007-2013 http://yaf.zmrnet.com All rights reserved.
+// | Copyright (c) 2007-2013 http://yafphp.duapp.com All rights reserved.
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
@@ -179,7 +179,7 @@ function __autoload($classname)
 
 	if(substr($classpath, 0, 4) == 'Yaf_')  // yafphp core class
 	{
-		$yafpath = new DirectoryIterator(YOD_COREDIR);
+		$yafpath = new DirectoryIterator(dirname(__FILE__));
 		foreach($yafpath as $incpath)
 		{
 			if($incpath->isDir() && $incpath->isDot()===false)

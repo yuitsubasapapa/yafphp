@@ -1,8 +1,23 @@
 <?php
 class Yaf_Registry {
-	public static Yaf_Registry has ( string $name );
-	public static Yaf_Registry get ( string $name );
-	public static Yaf_Registry set ( string $name ,
-	mixed $value );
-	public static Yaf_Registry del ( string $name );
+	public static function has ($name )
+	{
+
+	}
+
+	public static function get ( $name )
+	{
+
+	}
+
+	public static function set ( $name , $value )
+	{
+
+	}
+
+	public static function del ( $name )
+	{
+
+	}
+
 }

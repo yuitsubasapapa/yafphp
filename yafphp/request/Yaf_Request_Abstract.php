@@ -12,35 +12,110 @@ abstract class Yaf_Request_Abstract
 	protected $_dispatched ;
 	protected $_routed ;
 
-	public function getModuleName ( void );
-	public function getControllerName ( void );
-	public function getActionName ( void );
-	public function setModuleName ( string $name );
-	public function setControllerName ( string $name );
-	public function setActionName ( string $name );
-	public function getException ( void );
-	public function getParams ( void );
-	public function getParam ($name,$dafault = NULL );
-	public function setParam ($name, $value );
-	public function getMethod ( void );
-	public function isDispatched ( void );
-	public function setDispatched ( void );
-	public function isRouted ( void );
-	public function setRouted ( void );
+	public function getModuleName ()
+	{
+
+	}
+
+	public function getControllerName ()
+	{
+
+	}
+
+	public function getActionName ()
+	{
+
+	}
+
+	public function setModuleName ($name )
+	{
+
+	}
+
+	public function setControllerName ($name )
+	{
+
+	}
+
+	public function setActionName ($name )
+	{
+
+	}
+
+	public function getException ()
+	{
+
+	}
+
+	public function getParams ()
+	{
+
+	}
+
+	public function getParam ($name,$dafault = NULL )
+	{
+
+	}
+
+	public function setParam ($name, $value )
+	{
+
+	}
+
+	public function getMethod ()
+	{
+
+	}
+
+	public function isDispatched ()
+	{
+
+	}
+
+	public function setDispatched ()
+	{
+
+	}
+
+	public function isRouted ()
+	{
+
+	}
+
+	public function setRouted ()
+	{
+
+	}
+
 	
-	abstract public function getLanguage ( void );
-	abstract public function getQuery ( string $name = NULL );
-	abstract public function getPost ( string $name = NULL );
-	abstract public function getEnv ( string $name = NULL );
-	abstract public function getServer ( string $name = NULL );
-	abstract public function getCookie ( string $name = NULL );
-	abstract public function getFiles ( string $name = NULL );
-	abstract public function isGet ( void );
-	abstract public function isPost ( void );
-	abstract public function isHead ( void );
-	abstract public function isXmlHttpRequest ( void );
-	abstract public function isPut ( void );
-	abstract public function isDelete ( void );
-	abstract public function isOption ( void );
-	abstract public function isCli ( void );
+	abstract public function getLanguage ();
+
+	abstract public function getQuery ( $name = NULL );
+
+	abstract public function getPost ( $name = NULL );
+
+	abstract public function getEnv ($name = NULL );
+
+	abstract public function getServer ($name = NULL );
+
+	abstract public function getCookie ($name = NULL );
+
+	abstract public function getFiles ($name = NULL );
+
+	abstract public function isGet ();
+
+	abstract public function isPost ();
+
+	abstract public function isHead ();
+
+	abstract public function isXmlHttpRequest ();
+
+	abstract public function isPut ();
+
+	abstract public function isDelete ();
+
+	abstract public function isOption ();
+
+	abstract public function isCli ();
+
 }

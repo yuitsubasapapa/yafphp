@@ -1,5 +1,5 @@
 <?php
-class Yaf_Exception extends Exception
+class Yaf_Exception
 {
 	protected $message = '';
 	protected $code = 0;
@@ -16,22 +16,22 @@ class Yaf_Exception extends Exception
 	
 	final public function getMessage()
 	{
-		return parent::getMessage();
+		return $this->message;
 	}
 	
 	final public function getCode()
 	{
-		return parent::getCode();
+		return $this->code;
 	}
 	
 	final public function getFile()
 	{
-		return parent::getFile();
+		//return parent::getFile();
 	}
 	
 	final public function getLine()
 	{
-		return parent::getLine();
+		//return parent::getLine();
 	}
 
 	public final function getPrevious()

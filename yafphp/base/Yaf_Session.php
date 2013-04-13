@@ -1,16 +1,54 @@
 <?php
-final Yaf_Session implements Iterator , ArrayAccess , Countable
+final class Yaf_Session implements Iterator, ArrayAccess, Countable
 {
-	public static Yaf_Session getInstance ( void );
-	public Yaf_Session start ( void );
-	public mixed get ( string $name = NULL );
-	public boolean set ( string $name ,
-	mixed $value );
-	public mixed __get ( string $name );
-	public boolean __set ( string $name ,
-	mixed $value );
-	public boolean has ( string $name );
-	public boolean del ( string $name );
-	public boolean __isset ( string $name );
-	public boolean __unset ( string $name );
+	public static function getInstance ( )
+	{
+
+	}
+
+	public function start ( )
+	{
+
+	}
+
+	public function get ( $name = NULL )
+	{
+
+	}
+
+	public function set ( $name , $value )
+	{
+
+	}
+
+	public function __get ( $name )
+	{
+
+	}
+
+	public function __set ( $name , $value )
+	{
+
+	}
+
+	public function has ( $name )
+	{
+
+	}
+
+	public function del ( $name )
+	{
+
+	}
+
+	public function __isset ( $name )
+	{
+
+	}
+
+	public function __unset ( $name )
+	{
+
+	}
+
 }

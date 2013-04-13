@@ -12,32 +12,32 @@ final class Yaf_Loader
 
 	}
 	
-	public function registerLocalNamespace ( mixed $namespace )
+	public function registerLocalNamespace ( $namespace )
 	{
 
 	}
 	
-	public function getLocalNamespace ( void )
+	public function getLocalNamespace ( )
 	{
 
 	}
 	
-	public function clearLocalNamespace ( void )
+	public function clearLocalNamespace ( )
 	{
 
 	}
 	
-	public function isLocalName ( string $class_name )
+	public function isLocalName ( $class_name )
 	{
 
 	}
 	
-	public function autoload ( string $class_name )
+	public function autoload ( $class_name )
 	{
 
 	}
 	
-	public static function import ( string $file_name )
+	public static function import ( $file_name )
 	{
 
 	}

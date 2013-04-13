@@ -41,67 +41,67 @@ final class Yaf_Request_Http extends Yaf_Request_Abstract
 
 	}
 
-	public function isGet ( void )
+	public function isGet ()
 	{
 
 	}
 	
-	public function isPost ( void )
+	public function isPost ()
 	{
 
 	}
 	
-	public function isHead ( void )
+	public function isHead ()
 	{
 
 	}
 	
-	public function isXmlHttpRequest ( void )
+	public function isXmlHttpRequest ()
 	{
 
 	}
 	
-	public function isPut ( void )
+	public function isPut ()
 	{
 
 	}
 	
-	public function isDelete ( void )
+	public function isDelete ()
 	{
 
 	}
 	
-	public function isOption ( void )
+	public function isOption ()
 	{
 
 	}
 	
-	public function isCli ( void )
+	public function isCli ()
 	{
 
 	}
 	
-	public function isDispatched ( void )
+	public function isDispatched ()
 	{
 
 	}
 	
-	public function setDispatched ( void )
+	public function setDispatched ()
 	{
 
 	}
 	
-	public function isRouted ( void )
+	public function isRouted ()
 	{
 
 	}
 	
-	public function setRouted ( void )
+	public function setRouted ()
 	{
 
 	}
 	
-	public function getBaseUri ( void )
+	public function getBaseUri ()
 	{
 
 	}
