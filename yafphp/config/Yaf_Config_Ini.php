@@ -12,8 +12,7 @@ final class Yaf_Config_Ini extends Yaf_Config_Abstract
 		}elseif(is_string($config)){
 			if(file_exists($config)){
 				if(is_file($config)){
-					$this->_config = parse_ini_file($config, true);
-					$this->_config = self::_parse_section($this->_config);
+					$this->_config = self::_parser_cb($config, $section);
 					if($this->_config == FALSE || !is_array($this->_config)){
 						throw new Exception('Parsing ini file '. $config .' failed');
 						return;
@@ -102,21 +101,61 @@ final class Yaf_Config_Ini extends Yaf_Config_Abstract
 	}
 
 	/**
-	 * _parse_section
+	 * yaf_config_ini_parser_cb
 	 *
 	 */
-	private static function _parse_section($config){
-		foreach ($config as $key => $value) {
-			if($seg = strchr(skey, ':')) {)
+	private static function _parser_cb($filepath, $section){
+		$config = parse_ini_file($filepath, true);
+		if($config && is_array($config)){
+			foreach($config as $key => $value){
+				if($seg = ltrim(strchr($key, ':'), ': ')){
+					while($token = ltrim(strrchr($seg, ':'), ': ')){
+						if(isset($config[$token])){
+							$value = array_merge($config[$token], $value);
+						}
+						$seg = substr($seg, 0, -strlen($token));
+						$seg = rtrim($seg, ': ');
+					}
+
+					$token = rtrim($seg, ': ');
+					if(isset($config[$token])){
+						$value = array_merge($config[$token], $value);
+					}
+
+					if($key = trim(strtok($key, ':'))){
+						$config[$key] = $value;
+					}
+				}
+
+				if(trim($key) == $section){
+					return self::_simple_parser_cb($value);
+				}
+			}
 		}
-		return $config;
+
+		return false;
 	}
 
 	/**
-	 * _parse_value
+	 * yaf_config_ini_simple_parser_cb
 	 *
 	 */
-	private static function _parse_value($config){
+	private static function _simple_parser_cb($simple){
+		if(!is_array($simple)) return;
+		
+		foreach($simple as $key => $value){
+			if($seg = strtok($key, '.')){
+				if($subkey = ltrim(strchr($key, '.'), '.')){
+					$value = array($subkey => $value);
+					if(isset($simple[$seg]) && is_array($simple[$seg])){
+						$value = array_merge($simple[$seg], $value);
+					}
+					$simple[$seg] = self::_simple_parser_cb($value);
+					unset($simple[$key]);
+				}
+			}
+		}
 
+		return $simple;
 	}
 }
