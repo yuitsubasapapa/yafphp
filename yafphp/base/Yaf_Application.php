@@ -16,6 +16,8 @@ final class Yaf_Application
 	 */
 	public function __construct($config, $section = YAF_ENVIRON)
 	{
+		if(empty($config)) return;
+
 		if(!is_null(self::$_app)){
 			unset($this);
 			throw new Yaf_Exception_StartupError('Only one application can be initialized');

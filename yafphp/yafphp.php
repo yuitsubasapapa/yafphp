@@ -24,23 +24,24 @@ define('YAF_ERR_TYPE_ERROR', 521);
 defined('YAF_ENVIRON') or define('YAF_ENVIRON', 'product');
 defined('YAF_DEBUG') or define('YAF_DEBUG', false);
 
+require(dirname(__FILE__) . '/yafns.php');
+
 // yafphp autoload
 function __autoload($classname)
 {
-	if(substr($classname, 0, 4) == 'Yaf_')  // yafphp core class
+	$classfile = $classname;
+	// class name with namespace in PHP 5.3
+	if(strpos($classname, '\\') !== false)
+		$classfile = str_replace('\\', '_', $classname);
+
+	if(strtok($classfile, '_') == 'Yaf')  // yafphp core class
 	{
-		$yafpath = new DirectoryIterator(dirname(__FILE__));
-		foreach($yafpath as $incpath)
-		{
-			if($incpath->isDir() && $incpath->isDot()===false)
-			{
-				$classpath	= $incpath->getPathname() . DIRECTORY_SEPARATOR . $classname . '.php';
-				if(is_file($classpath))
-				{
-					include($classpath);
-					break;
-				}
-			}
+		$classpath = dirname(__FILE__) . '/' . strtolower(strtok('_')) . '/' . $classfile . '.php';
+		if(is_file($classpath)){
+			include($classpath);
+		}else{
+			$classpath	= dirname(__FILE__) . '/base/' . $classfile . '.php';
+			if(is_file($classpath)) include($classpath);
 		}
 	}
 
