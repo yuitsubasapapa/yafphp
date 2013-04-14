@@ -15,23 +15,39 @@ final class Yaf_Config_Simple extends Yaf_Config_Abstract
 			}
 		}else{
 			throw new Yaf_Exception_TypeError('Invalid parameters provided, must be an array');
-			return NULL;
+			return;
 		}
 	}
 
 	/**
-	 * __get
+	 * get
 	 *
 	 */
-	public function __get($name)
+	public function get($name = NULL)
 	{
+		if(is_null($name)) return $this;
+
 		if(isset($this->_config[$name])){
 			$value = $this->_config[$name];
 			if(is_array($value)){
-				return new Yaf_Config_Simple($value);
+				return new self($value);
 			}else{
 				return $value;
 			}
+		}
+	}
+
+	/**
+	 * Iterator::current
+	 *
+	 */
+	public function current()
+	{
+		$value = current($this->_config);
+		if(is_array($value)){
+			return new self($value);
+		}else{
+			return $value;
 		}
 	}
 

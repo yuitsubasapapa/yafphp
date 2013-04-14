@@ -60,10 +60,7 @@ abstract class Yaf_Config_Abstract implements Iterator, ArrayAccess, Countable
 	public function get($name = NULL)
 	{
 		if(is_null($name)) return $this;
-
-		if(isset($this->_config[$name]))
-			return $this->_config[$name];
-		
+		if(isset($this->_config[$name])) return $this->_config[$name];
 	}
 
 	/**
@@ -72,8 +69,9 @@ abstract class Yaf_Config_Abstract implements Iterator, ArrayAccess, Countable
 	 */
 	public function set($name, $value)
 	{
-		if(!$this->_readonly)
-			$this->_config[$name] = $value;
+		if($this->_readonly) return;
+		if(is_string($name)) $this->_config[$name] = $value;
+		throw new Exception('Expect a string key name', E_WARNING);
 	}
 
 	/**
@@ -118,8 +116,9 @@ abstract class Yaf_Config_Abstract implements Iterator, ArrayAccess, Countable
 	 */
 	public function offsetUnset($name)
 	{
-		if(!$this->_readonly)
-			unset($this->_config[$name]);
+		if($this->_readonly) return;
+		if(is_string($name)) unset($this->_config[$name]);
+		throw new Exception('Expect a string key name', E_WARNING);
 	}
 
 	/**
