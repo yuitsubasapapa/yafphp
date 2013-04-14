@@ -13,6 +13,7 @@ final class Yaf_Config_Ini extends Yaf_Config_Abstract
 			if(file_exists($config)){
 				if(is_file($config)){
 					$this->_config = parse_ini_file($config, true);
+					$this->_config = self::_parse_section($this->_config);
 					if($this->_config == FALSE || !is_array($this->_config)){
 						throw new Exception('Parsing ini file '. $config .' failed');
 						return;
@@ -29,7 +30,6 @@ final class Yaf_Config_Ini extends Yaf_Config_Abstract
 			throw new Exception('Invalid parameters provided, must be path of ini file');
 			return;
 		}
-
 	}
 	
 	/**
@@ -102,18 +102,21 @@ final class Yaf_Config_Ini extends Yaf_Config_Abstract
 	}
 
 	/**
-	 * _parserKey
+	 * _parse_section
 	 *
 	 */
-	private static function _parserColon($config){
-
+	private static function _parse_section($config){
+		foreach ($config as $key => $value) {
+			if($seg = strchr(skey, ':')) {)
+		}
+		return $config;
 	}
 
 	/**
-	 * _parserKey
+	 * _parse_value
 	 *
 	 */
-	private static function _parserPoint($config){
+	private static function _parse_value($config){
 
 	}
 }

@@ -7,6 +7,26 @@ abstract class Yaf_Config_Abstract implements Iterator, ArrayAccess, Countable
 	protected $_readonly = TRUE;
 
 	/**
+	 * __construct
+	 *
+	 */
+	public function __construct($config, $section = YAF_ENVIRON)
+	{
+		if(is_string($config)){
+			return new Yaf_Config_Ini($config, $section);
+		}
+
+		if(is_array($config)){
+			return new Yaf_Config_Simple($config, true);
+		}
+
+		throw new Yaf_Exception_TypeError('Expects a string or an array as parameter');
+		return;
+	}
+
+
+
+	/**
 	 * __get
 	 *
 	 */
