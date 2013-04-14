@@ -6,7 +6,7 @@
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
-// | Author: zmrnet <zmrnet@qq.com>
+// | Author: baoqiang <zmrnet@qq.com>
 // +----------------------------------------------------------------------
 
 define('YAF_VERSION', '1.0.0');
@@ -22,20 +22,28 @@ define('YAF_ERR_AUTOLOAD_FAILED', 520);
 define('YAF_ERR_TYPE_ERROR', 521);
 
 defined('YAF_ENVIRON') or define('YAF_ENVIRON', 'product');
-defined('YAF_DEBUG') or define('YAF_DEBUG', false);
+defined('YAF_LIBRARY') or define('YAF_LIBRARY', NULL);
+defined('YAF_NAME_SUFFIX') or define('YAF_NAME_SUFFIX', TRUE);
+defined('YAF_NAME_SEPARATOR') or define('YAF_NAME_SEPARATOR', '');
+defined('YAF_FORWARD_LIMIT') or define('YAF_FORWARD_LIMIT', 5);
+defined('YAF_CACHE_CONFIG') or define('YAF_CACHE_CONFIG', FALSE);
+defined('YAF_USE_NAMESPACE') or define('YAF_USE_NAMESPACE', FALSE);
+defined('YAF_USE_SPL_AUTOLOAD') or define('YAF_USE_SPL_AUTOLOAD', TRUE);
+
+defined('YAF_DEBUG') or define('YAF_DEBUG', TRUE);
 
 // yafphp autoload
 function __autoload($classname)
 {
 	$classfile = $classname;
-	if(strtok($classfile, '_') == 'Yaf')  // yafphp core class
+	if (strtok($classfile, '_') == 'Yaf')  // yafphp core class
 	{
 		$classpath = dirname(__FILE__) . '/' . strtolower(strtok('_')) . '/' . $classfile . '.php';
-		if(is_file($classpath)){
+		if (is_file($classpath)) {
 			include($classpath);
-		}else{
+		} else {
 			$classpath	= dirname(__FILE__) . '/base/' . $classfile . '.php';
-			if(is_file($classpath)) include($classpath);
+			if (is_file($classpath)) include($classpath);
 		}
 	}
 

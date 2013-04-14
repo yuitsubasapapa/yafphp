@@ -18,12 +18,12 @@ final class Yaf_Config_Simple extends Yaf_Config_Abstract
 	 */
 	public function __construct($config, $readonly = NULL)
 	{
-		if(is_array($config)){
+		if (is_array($config)) {
 			$this->_config = $config;
-			if(!is_null($readonly)){
+			if (!is_null($readonly)) {
 				$this->_readonly = (bool)$readonly;
 			}
-		}else{
+		} else {
 			throw new Yaf_Exception_TypeError('Invalid parameters provided, must be an array');
 			return;
 		}
@@ -35,13 +35,13 @@ final class Yaf_Config_Simple extends Yaf_Config_Abstract
 	 */
 	public function get($name = NULL)
 	{
-		if(is_null($name)) return $this;
+		if (is_null($name)) return $this;
 
-		if(isset($this->_config[$name])){
+		if (isset($this->_config[$name])) {
 			$value = $this->_config[$name];
-			if(is_array($value)){
+			if (is_array($value)) {
 				return new self($value);
-			}else{
+			} else {
 				return $value;
 			}
 		}
@@ -54,9 +54,9 @@ final class Yaf_Config_Simple extends Yaf_Config_Abstract
 	public function current()
 	{
 		$value = current($this->_config);
-		if(is_array($value)){
+		if (is_array($value)) {
 			return new self($value);
-		}else{
+		} else {
 			return $value;
 		}
 	}

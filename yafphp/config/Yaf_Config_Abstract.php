@@ -22,11 +22,11 @@ abstract class Yaf_Config_Abstract implements Iterator, ArrayAccess, Countable
 	 */
 	public function __construct($config, $section = YAF_ENVIRON)
 	{
-		if(is_string($config)){
+		if (is_string($config)) {
 			return new Yaf_Config_Ini($config, $section);
 		}
 
-		if(is_array($config)){
+		if (is_array($config)) {
 			return new Yaf_Config_Simple($config, true);
 		}
 
@@ -69,8 +69,8 @@ abstract class Yaf_Config_Abstract implements Iterator, ArrayAccess, Countable
 	 */
 	public function get($name = NULL)
 	{
-		if(is_null($name)) return $this;
-		if(isset($this->_config[$name])) return $this->_config[$name];
+		if (is_null($name)) return $this;
+		if (isset($this->_config[$name])) return $this->_config[$name];
 	}
 
 	/**
@@ -79,8 +79,8 @@ abstract class Yaf_Config_Abstract implements Iterator, ArrayAccess, Countable
 	 */
 	public function set($name, $value)
 	{
-		if($this->_readonly) return;
-		if(is_string($name)) $this->_config[$name] = $value;
+		if ($this->_readonly) return;
+		if (is_string($name)) $this->_config[$name] = $value;
 		throw new Exception('Expect a string key name', E_WARNING);
 	}
 
@@ -126,8 +126,8 @@ abstract class Yaf_Config_Abstract implements Iterator, ArrayAccess, Countable
 	 */
 	public function offsetUnset($name)
 	{
-		if($this->_readonly) return;
-		if(is_string($name)) unset($this->_config[$name]);
+		if ($this->_readonly) return;
+		if (is_string($name)) unset($this->_config[$name]);
 		throw new Exception('Expect a string key name', E_WARNING);
 	}
 

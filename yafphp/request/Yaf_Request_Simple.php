@@ -6,12 +6,12 @@
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
-// | Author: zmrnet <zmrnet@qq.com>
+// | Author: baoqiang <zmrnet@qq.com>
 // +----------------------------------------------------------------------
 
 final class Yaf_Request_Simple extends Yaf_Request_Abstract
 {
-	public function __construct ( $module , $controller , $action , $method , $params = NULL )
+	public function __construct ($module, $controller, $action, $method, $params = NULL)
 	{
 
 	}
