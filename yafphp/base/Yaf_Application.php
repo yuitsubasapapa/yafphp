@@ -54,7 +54,7 @@ final class Yaf_Application
 			return;
 		}
 
-		$request = new Yaf_Request_Http(null, $base_uri);
+		$request = new Yaf_Request_Http(null, $this->_base_uri);
 
 		self::$_app = &$this;
 	}
@@ -151,18 +151,13 @@ final class Yaf_Application
 			return FALSE;
 		}
 
-/*
-app = *ppzval;
-	if (Z_TYPE_P(app) != IS_ARRAY) {
-		yaf_trigger_error(YAF_ERR_TYPE_ERROR TSRMLS_CC, "%s", "Expected an array of application configure");
-		return FAILURE;
-	}
+		if (!isset($app['directory'])) {
+			throw new Yaf_Exception_StartupError('Expected a directory entry in application configures');
+			return FALSE;
+		}
 
-	if (zend_hash_find(Z_ARRVAL_P(app), ZEND_STRS("directory"), (void **)&ppzval) == FAILURE
-			|| Z_TYPE_PP(ppzval) != IS_STRING) {
-		yaf_trigger_error(YAF_ERR_STARTUP_FAILED TSRMLS_CC, "%s", "Expected a directory entry in application configures");
-		return FAILURE;
-	}
+
+/*
 
 	if (*(Z_STRVAL_PP(ppzval) + Z_STRLEN_PP(ppzval) - 1) == DEFAULT_SLASH) {
 		YAF_G(directory) = estrndup(Z_STRVAL_PP(ppzval), Z_STRLEN_PP(ppzval) - 1);
