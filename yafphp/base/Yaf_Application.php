@@ -27,7 +27,7 @@ final class Yaf_Application
 		'local_library' => '/library',
 		'local_namespaces' => '',
 		'view_ext' => 'phtml',
-		'base_uri' => NULL,
+		'base_uri' => null,
 		'default_module' => 'index',
 		'default_controller' => 'index',
 		'default_action' => 'index',
@@ -65,13 +65,21 @@ final class Yaf_Application
 		if (is_null($this->_config)
 				|| !is_object($this->_config)
 				|| !($this->_config instanceof Yaf_Config_Abstract)
-				|| $this->_parse_option() == FALSE) {
+				|| $this->_parse_option() == false) {
 			unset($this);
 			throw new Yaf_Exception_StartupError('Initialization of application config failed');
 			return;
 		}
 
-		$request = new Yaf_Request_Http(null, $this->_base_uri);
+		$request = new Yaf_Request_Http(null, $this->_g['base_uri']);
+		if ($this->_g['base_uri']) {
+			$this->_g['base_uri'] = null;
+		}
+
+		if(!$request){
+			throw new Yaf_Exception_StartupError('Initialization of request failed');
+			return;
+		}
 
 		self::$_app = &$this;
 	}
@@ -157,26 +165,26 @@ final class Yaf_Application
 		if (is_null($config)) $config = $this->_config;
 
 		if (!($config instanceof Yaf_Config_Abstract)){
-			return FALSE;
+			return false;
 		}
 
 		if (!isset($config->application)) {
 			/* For back compatibilty */
 			if (!isset($config->yaf)) {
 				throw new Yaf_Exception_TypeError('Expected an array of application configure');
-				return FALSE;
+				return false;
 			}
 		}
 
 		$app = isset($config->application) ? $config->application : $config->yaf;
 		if (!($app instanceof Yaf_Config_Abstract)) {
 			throw new Yaf_Exception_TypeError('Expected an array of application configure');
-			return FALSE;
+			return false;
 		}
 
 		if (!isset($app->directory)) {
 			throw new Yaf_Exception_StartupError('Expected a directory entry in application configures');
-			return FALSE;
+			return false;
 		}
 
 		$this->_g['directory'] = rtrim($app->directory, '\\ /');
@@ -269,7 +277,7 @@ final class Yaf_Application
 			}
 		}
 
-		return TRUE;
+		return true;
 	}
 
 /*
