@@ -17,14 +17,4 @@ $yafapp  = new Yaf_Application($config);
 $yafapp->bootstrap()->run();
 
 echo '<pre>';
-$config = $yafapp->getConfig();
-print_r($config);
-print_r($config->get('database.master.host'));
-
-echo '<pre>';
-$config = require(APP_PATH . '/conf/app.php');
-print_r($config);
-$config = new Yaf_Config_Simple($config);
-print_r($config->get('application'));
-
-print_r($GLOBALS);
+print_r($yafapp);
