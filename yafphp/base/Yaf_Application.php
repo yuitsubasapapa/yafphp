@@ -81,6 +81,67 @@ final class Yaf_Application
 			return;
 		}
 
+		$this->_dispatcher = new Yaf_Dispatcher();
+		if (is_null($this->_dispatcher)
+				|| !is_object($this->_dispatcher)
+				|| !($this->_dispatcher instanceof Yaf_Dispatcher)) {
+			unset($this);
+			throw new Yaf_Exception_StartupError('Instantiation of application dispatcher failed');
+			return;
+		}
+		$this->_dispatcher->setRequest($request);
+
+/*
+	zdispatcher = yaf_dispatcher_instance(NULL TSRMLS_CC);
+	if (NULL == zdispatcher
+			|| Z_TYPE_P(zdispatcher) != IS_OBJECT
+			|| !instanceof_function(Z_OBJCE_P(zdispatcher), yaf_dispatcher_ce TSRMLS_CC)) {
+		YAF_UNINITIALIZED_OBJECT(getThis());
+		yaf_trigger_error(YAF_ERR_STARTUP_FAILED TSRMLS_CC, "Instantiation of application dispatcher failed");
+		RETURN_FALSE;
+	}
+	yaf_dispatcher_set_request(zdispatcher, request TSRMLS_CC);
+
+	zend_update_property(yaf_application_ce, self, ZEND_STRL(YAF_APPLICATION_PROPERTY_NAME_CONFIG), zconfig TSRMLS_CC);
+	zend_update_property(yaf_application_ce, self, ZEND_STRL(YAF_APPLICATION_PROPERTY_NAME_DISPATCHER), zdispatcher TSRMLS_CC);
+
+	zval_ptr_dtor(&request);
+	zval_ptr_dtor(&zdispatcher);
+	zval_ptr_dtor(&zconfig);
+
+	if (YAF_G(local_library)) {
+		loader = yaf_loader_instance(NULL, YAF_G(local_library),
+				strlen(YAF_G(global_library))? YAF_G(global_library) : NULL TSRMLS_CC);
+		efree(YAF_G(local_library));
+		YAF_G(local_library) = NULL;
+	} else {
+		char *local_library;
+		spprintf(&local_library, 0, "%s%c%s", YAF_G(directory), DEFAULT_SLASH, YAF_LIBRARY_DIRECTORY_NAME);
+		loader = yaf_loader_instance(NULL, local_library,
+				strlen(YAF_G(global_library))? YAF_G(global_library) : NULL TSRMLS_CC);
+		efree(local_library);
+	}
+
+	if (!loader) {
+		YAF_UNINITIALIZED_OBJECT(getThis());
+		yaf_trigger_error(YAF_ERR_STARTUP_FAILED TSRMLS_CC, "Initialization of application auto loader failed");
+		RETURN_FALSE;
+	}
+
+	zend_update_property_bool(yaf_application_ce, self, ZEND_STRL(YAF_APPLICATION_PROPERTY_NAME_RUN), 0 TSRMLS_CC);
+	zend_update_property_string(yaf_application_ce, self, ZEND_STRL(YAF_APPLICATION_PROPERTY_NAME_ENV), YAF_G(environ) TSRMLS_CC);
+
+	if (YAF_G(modules)) {
+		zend_update_property(yaf_application_ce, self, ZEND_STRL(YAF_APPLICATION_PROPERTY_NAME_MODULES), YAF_G(modules) TSRMLS_CC);
+		Z_DELREF_P(YAF_G(modules));
+		YAF_G(modules) = NULL;
+	} else {
+		zend_update_property_null(yaf_application_ce, self, ZEND_STRL(YAF_APPLICATION_PROPERTY_NAME_MODULES) TSRMLS_CC);
+	}
+
+	zend_update_static_property(yaf_application_ce, ZEND_STRL(YAF_APPLICATION_PROPERTY_NAME_APP), self TSRMLS_CC);
+*/
+
 		self::$_app = &$this;
 	}
 
