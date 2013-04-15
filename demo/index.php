@@ -8,7 +8,7 @@ date_default_timezone_set('Asia/Shanghai');
 defined('YAF_ENVIRON') or define('YAF_ENVIRON', 'develop');
 
 // yafphp
-class_exists('Yaf_Application') or require(dirname(__FILE__) . '/yafphp/yafphp.php');
+class_exists('Yaf_Application') or require(dirname(__FILE__) . '/../yafphp/yafphp.php');
 // yafphp use namespace
 //class_exists('Yaf\Application') or require(dirname(__FILE__) . '/yafpns/yafpns.php');
 
