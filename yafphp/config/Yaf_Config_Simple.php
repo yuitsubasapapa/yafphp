@@ -6,7 +6,7 @@
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
-// | Author: zmrnet <zmrnet@qq.com>
+// | Author: baoqiang <zmrnet@qq.com>
 // +----------------------------------------------------------------------
 
 final class Yaf_Config_Simple extends Yaf_Config_Abstract
@@ -16,7 +16,7 @@ final class Yaf_Config_Simple extends Yaf_Config_Abstract
 	 * __construct
 	 *
 	 */
-	public function __construct($config, $readonly = NULL)
+	public function __construct($config, $readonly = null)
 	{
 		if (is_array($config)) {
 			$this->_config = $config;
@@ -33,7 +33,7 @@ final class Yaf_Config_Simple extends Yaf_Config_Abstract
 	 * get
 	 *
 	 */
-	public function get($name = NULL)
+	public function get($name = null)
 	{
 		if (is_null($name)) return $this;
 

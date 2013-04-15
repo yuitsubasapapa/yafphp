@@ -6,7 +6,7 @@
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
-// | Author: zmrnet <zmrnet@qq.com>
+// | Author: baoqiang <zmrnet@qq.com>
 // +----------------------------------------------------------------------
 
 abstract class Yaf_Config_Abstract implements Iterator, ArrayAccess, Countable
@@ -14,7 +14,7 @@ abstract class Yaf_Config_Abstract implements Iterator, ArrayAccess, Countable
 	// array _config
 	protected $_config = array();
 	// boolean _readonly
-	protected $_readonly = TRUE;
+	protected $_readonly = true;
 
 	/**
 	 * __construct
@@ -67,7 +67,7 @@ abstract class Yaf_Config_Abstract implements Iterator, ArrayAccess, Countable
 	 * get
 	 *
 	 */
-	public function get($name = NULL)
+	public function get($name = null)
 	{
 		if (is_null($name)) return $this;
 		if (isset($this->_config[$name])) return $this->_config[$name];

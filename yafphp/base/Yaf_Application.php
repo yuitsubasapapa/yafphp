@@ -11,20 +11,21 @@
 
 final class Yaf_Application
 {
-	protected static $_app = NULL;
+	protected static $_app = null;
 
-	protected $_config = NULL;
+	protected $_config = null;
 	protected $_dispatcher;
 	protected $_environ = YAF_ENVIRON;
 	protected $_modules = array();
 
-	protected $_run = FALSE;
+	protected $_run = false;
 
 	private $_g = array(
 		'directory' => '',
 		'ext' => 'php',
 		'bootstrap' => '/Bootstrap.php',
-		'local_library' => '/library',
+		'global_library' => YAF_LIBRARY,
+		'local_library' => null,
 		'local_namespaces' => '',
 		'view_ext' => 'phtml',
 		'base_uri' => null,
@@ -41,7 +42,7 @@ final class Yaf_Application
 	 * __construct
 	 *
 	 */
-	public function __construct($config, $section = YAF_ENVIRON)
+	public function __construct($config, $section = null)
 	{
 		if (empty($config)) return;
 
@@ -51,8 +52,8 @@ final class Yaf_Application
 			return;
 		}
 
-		if (is_string($section) && strlen($section)) {
-			$this->_environ = $section;
+		if (empty($section)) {
+			$section = $this->_environ;
 		}
 
 		if (is_string($config)) {
@@ -72,9 +73,7 @@ final class Yaf_Application
 		}
 
 		$request = new Yaf_Request_Http(null, $this->_g['base_uri']);
-		if ($this->_g['base_uri']) {
-			$this->_g['base_uri'] = null;
-		}
+		unset($this->_g['base_uri']);
 
 		if(!$request){
 			throw new Yaf_Exception_StartupError('Initialization of request failed');
@@ -91,58 +90,31 @@ final class Yaf_Application
 		}
 		$this->_dispatcher->setRequest($request);
 
-/*
-	zdispatcher = yaf_dispatcher_instance(NULL TSRMLS_CC);
-	if (NULL == zdispatcher
-			|| Z_TYPE_P(zdispatcher) != IS_OBJECT
-			|| !instanceof_function(Z_OBJCE_P(zdispatcher), yaf_dispatcher_ce TSRMLS_CC)) {
-		YAF_UNINITIALIZED_OBJECT(getThis());
-		yaf_trigger_error(YAF_ERR_STARTUP_FAILED TSRMLS_CC, "Instantiation of application dispatcher failed");
-		RETURN_FALSE;
-	}
-	yaf_dispatcher_set_request(zdispatcher, request TSRMLS_CC);
+		if ($this->_g['local_library']) {
+			$loader = Yaf_Loader::getInstance($this->_g['local_library'], $this->_g['global_library']);
+		} else {
+			$local_library = $this->_g['directory'] . '/library';
+			$loader = Yaf_Loader::getInstance($local_library, $this->_g['global_library']);
+		}
+		unset($this->_g['local_library']);
 
-	zend_update_property(yaf_application_ce, self, ZEND_STRL(YAF_APPLICATION_PROPERTY_NAME_CONFIG), zconfig TSRMLS_CC);
-	zend_update_property(yaf_application_ce, self, ZEND_STRL(YAF_APPLICATION_PROPERTY_NAME_DISPATCHER), zdispatcher TSRMLS_CC);
+		if (!$loader) {
+			unset($this);
+			throw new Yaf_Exception_StartupError('Initialization of application auto loader failed');
+			return;
+		}
 
-	zval_ptr_dtor(&request);
-	zval_ptr_dtor(&zdispatcher);
-	zval_ptr_dtor(&zconfig);
+		$this->_run = false;
 
-	if (YAF_G(local_library)) {
-		loader = yaf_loader_instance(NULL, YAF_G(local_library),
-				strlen(YAF_G(global_library))? YAF_G(global_library) : NULL TSRMLS_CC);
-		efree(YAF_G(local_library));
-		YAF_G(local_library) = NULL;
-	} else {
-		char *local_library;
-		spprintf(&local_library, 0, "%s%c%s", YAF_G(directory), DEFAULT_SLASH, YAF_LIBRARY_DIRECTORY_NAME);
-		loader = yaf_loader_instance(NULL, local_library,
-				strlen(YAF_G(global_library))? YAF_G(global_library) : NULL TSRMLS_CC);
-		efree(local_library);
-	}
+		if ($this->_g['modules']) {
+			$this->_modules = $this->_g['modules'];
+			
+		} else {
+			$this->_modules = null;
+		}
+		unset($this->_g['modules']);
 
-	if (!loader) {
-		YAF_UNINITIALIZED_OBJECT(getThis());
-		yaf_trigger_error(YAF_ERR_STARTUP_FAILED TSRMLS_CC, "Initialization of application auto loader failed");
-		RETURN_FALSE;
-	}
-
-	zend_update_property_bool(yaf_application_ce, self, ZEND_STRL(YAF_APPLICATION_PROPERTY_NAME_RUN), 0 TSRMLS_CC);
-	zend_update_property_string(yaf_application_ce, self, ZEND_STRL(YAF_APPLICATION_PROPERTY_NAME_ENV), YAF_G(environ) TSRMLS_CC);
-
-	if (YAF_G(modules)) {
-		zend_update_property(yaf_application_ce, self, ZEND_STRL(YAF_APPLICATION_PROPERTY_NAME_MODULES), YAF_G(modules) TSRMLS_CC);
-		Z_DELREF_P(YAF_G(modules));
-		YAF_G(modules) = NULL;
-	} else {
-		zend_update_property_null(yaf_application_ce, self, ZEND_STRL(YAF_APPLICATION_PROPERTY_NAME_MODULES) TSRMLS_CC);
-	}
-
-	zend_update_static_property(yaf_application_ce, ZEND_STRL(YAF_APPLICATION_PROPERTY_NAME_APP), self TSRMLS_CC);
-*/
-
-		self::$_app = &$this;
+		self::$_app = $this;
 	}
 
 	/**
@@ -160,6 +132,7 @@ final class Yaf_Application
 	 */
 	public function run()
 	{
+		//unset($this->_g);
 		return $this;
 	}
 
@@ -205,14 +178,14 @@ final class Yaf_Application
 	 */
 	public function environ()
 	{
-
+		return $this->_environ;
 	}
 
 	/**
 	 * execute
 	 *
 	 */
-	public function execute($funcion, $parameter = NULL)
+	public function execute($funcion, $parameter = null)
 	{
 
 	}
@@ -221,7 +194,7 @@ final class Yaf_Application
 	 * yaf_application_parse_option
 	 *
 	 */
-	private function _parse_option($config = NULL)
+	private function _parse_option($config = null)
 	{
 		if (is_null($config)) $config = $this->_config;
 
@@ -260,9 +233,7 @@ final class Yaf_Application
 			$this->_g['bootstrap'] = $this->_g['directory'] . $this->_g['bootstrap'];
 		}
 
-		if (!isset($app->library)) {
-			$this->_g['local_library'] = $this->_g['directory'] . $this->_g['local_library'];
-		} else {
+		if (isset($app->library)) {
 			if (is_string($app->library)) {
 				$this->_g['local_library'] = $app->library;
 			} elseif ($app->library instanceof Yaf_Config_Abstract) {

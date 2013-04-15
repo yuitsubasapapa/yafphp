@@ -6,7 +6,7 @@
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
-// | Author: zmrnet <zmrnet@qq.com>
+// | Author: baoqiang <zmrnet@qq.com>
 // +----------------------------------------------------------------------
 
 final class Yaf_Config_Ini extends Yaf_Config_Abstract
@@ -15,7 +15,7 @@ final class Yaf_Config_Ini extends Yaf_Config_Abstract
 	 * __construct
 	 *
 	 */
-	public function __construct($config, $section = YAF_ENVIRON)
+	public function __construct($config, $section = null)
 	{
 		if (is_array($config)) {
 			$this->_config = $config;
@@ -23,7 +23,7 @@ final class Yaf_Config_Ini extends Yaf_Config_Abstract
 			if (file_exists($config)) {
 				if (is_file($config)) {
 					$this->_config = self::_parser_cb($config, $section);
-					if ($this->_config == FALSE || !is_array($this->_config)) {
+					if ($this->_config == false || !is_array($this->_config)) {
 						throw new Exception('Parsing ini file '. $config .' failed', E_ERROR);
 						return;
 					}
@@ -45,7 +45,7 @@ final class Yaf_Config_Ini extends Yaf_Config_Abstract
 	 * get
 	 *
 	 */
-	public function get($name = NULL)
+	public function get($name = null)
 	{
 		if (is_null($name)) return $this;
 		
@@ -128,15 +128,19 @@ final class Yaf_Config_Ini extends Yaf_Config_Abstract
 						$value = array_merge($config[$token], $value);
 					}
 
-					if ($key = trim(strtok($key, ':'))) {
-						$config[$key] = $value;
-					}
+					unset($config[$key]);
+
+					$key = trim(strtok($key, ':'));
 				}
 
-				if (trim($key) == $section) {
+				$config[$key] = self::_simple_parser_cb($value);
+
+				if (is_string($section) && ($key == $section)) {
 					return self::_simple_parser_cb($value);
 				}
 			}
+
+			return $config;
 		}
 
 		return false;

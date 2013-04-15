@@ -1,43 +1,98 @@
 <?php
+// +----------------------------------------------------------------------
+// | yafphp [ Yaf PHP Framework ]
+// +----------------------------------------------------------------------
+// | Copyright (c) 2013 http://yafphp.duapp.com All rights reserved.
+// +----------------------------------------------------------------------
+// | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
+// +----------------------------------------------------------------------
+// | Author: baoqiang <zmrnet@qq.com>
+// +----------------------------------------------------------------------
+
 final class Yaf_Loader
 {
-	protected static $_instance ;
+	protected static $_instance;
 
-	protected $_library_directory ;
-	protected $_global_library_directory ;
-	protected $_local_ns ;
+	protected $_library_directory;
+	protected $_global_library_directory;
+	protected $_local_ns;
 
-	public static function getInstance($local_library_directory = NULL, $global_library_directory = NULL )
+	/**
+	 * getInstance
+	 *
+	 */
+	public static function getInstance($local_library_directory = null, $global_library_directory = null)
+	{
+		if (!(self::$_instance instanceof self)) {
+			if ((is_null($local_library_directory) && is_null($global_library_directory))
+					|| (empty($local_library_directory) && empty($global_library_directory))
+				){
+				return;
+			}
+
+			self::$_instance = new self();
+		}
+		
+		if ($local_library_directory && is_string($local_library_directory)) {
+			self::$_instance->_library_directory = $local_library_directory;
+		}
+
+		if ($global_library_directory && is_string($global_library_directory)) {
+			self::$_instance->_global_library_directory = $global_library_directory;
+		}
+		return self::$_instance;
+	}
+	
+	/**
+	 * registerLocalNamespace
+	 *
+	 */
+	public function registerLocalNamespace($namespace)
 	{
 
 	}
 	
-	public function registerLocalNamespace ( $namespace )
+	/**
+	 * getLocalNamespace
+	 *
+	 */
+	public function getLocalNamespace()
 	{
 
 	}
 	
-	public function getLocalNamespace ( )
+	/**
+	 * clearLocalNamespace
+	 *
+	 */
+	public function clearLocalNamespace()
 	{
 
 	}
 	
-	public function clearLocalNamespace ( )
+	/**
+	 * isLocalName
+	 *
+	 */
+	public function isLocalName($class_name)
 	{
 
 	}
 	
-	public function isLocalName ( $class_name )
+	/**
+	 * autoload
+	 *
+	 */
+	public function autoload($class_name)
 	{
 
 	}
 	
-	public function autoload ( $class_name )
-	{
-
-	}
-	
-	public static function import ( $file_name )
+	/**
+	 * import
+	 *
+	 */
+	public static function import($file_name)
 	{
 
 	}
