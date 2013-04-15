@@ -1,5 +1,16 @@
 <?php
-class Yaf_View_Simple extends Yaf_View_Interface {
+// +----------------------------------------------------------------------
+// | yafphp [ Yaf PHP Framework ]
+// +----------------------------------------------------------------------
+// | Copyright (c) 2013 http://yafphp.duapp.com All rights reserved.
+// +----------------------------------------------------------------------
+// | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
+// +----------------------------------------------------------------------
+// | Author: zmrnet <zmrnet@qq.com>
+// +----------------------------------------------------------------------
+
+class Yaf_View_Simple extends Yaf_View_Interface
+{
 	protected $_tpl_vars ;
 	protected $_script_path ;
 	

@@ -36,6 +36,9 @@ defined('YAF_DEBUG') or define('YAF_DEBUG', TRUE);
 function __autoload($classname)
 {
 	$classfile = $classname;
+	// class name with namespace in PHP 5.3
+	if(strpos($classname, '\\') !== false)
+		$classfile = str_replace('\\', '_', $classname);
 	if (strtok($classfile, '_') == 'Yaf')  // yafphp core class
 	{
 		$classpath = dirname(__FILE__) . '/' . strtolower(strtok('_')) . '/' . $classfile . '.php';

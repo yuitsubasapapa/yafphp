@@ -1,4 +1,14 @@
 <?php
+// +----------------------------------------------------------------------
+// | yafphp [ Yaf PHP Framework ]
+// +----------------------------------------------------------------------
+// | Copyright (c) 2013 http://yafphp.duapp.com All rights reserved.
+// +----------------------------------------------------------------------
+// | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
+// +----------------------------------------------------------------------
+// | Author: zmrnet <zmrnet@qq.com>
+// +----------------------------------------------------------------------
+
 final class Yaf_Config_Ini extends Yaf_Config_Abstract
 {
 	/**
@@ -7,25 +17,25 @@ final class Yaf_Config_Ini extends Yaf_Config_Abstract
 	 */
 	public function __construct($config, $section = YAF_ENVIRON)
 	{
-		if(is_array($config)){
+		if (is_array($config)) {
 			$this->_config = $config;
-		}elseif(is_string($config)){
-			if(file_exists($config)){
-				if(is_file($config)){
+		} elseif (is_string($config)) {
+			if (file_exists($config)) {
+				if (is_file($config)) {
 					$this->_config = self::_parser_cb($config, $section);
-					if($this->_config == FALSE || !is_array($this->_config)){
+					if ($this->_config == FALSE || !is_array($this->_config)) {
 						throw new Exception('Parsing ini file '. $config .' failed', E_ERROR);
 						return;
 					}
-				}else{
+				} else {
 					throw new Exception('Argument is not a valid ini file '. $config, E_ERROR);
 					return;
 				}
-			}else{
+			} else {
 				throw new Exception('Unable to find config file '. $config, E_ERROR);
 				return;
 			}
-		}else{
+		} else {
 			throw new Exception('Invalid parameters provided, must be path of ini file', E_ERROR);
 			return;
 		}
@@ -37,18 +47,18 @@ final class Yaf_Config_Ini extends Yaf_Config_Abstract
 	 */
 	public function get($name = NULL)
 	{
-		if(is_null($name)) return $this;
+		if (is_null($name)) return $this;
 		
-		if($seg = strtok($name, '.')){
+		if ($seg = strtok($name, '.')) {
 			$value = $this->_config;
-			while($seg){
-				if(!isset($value[$seg])) return;
+			while ($seg) {
+				if (!isset($value[$seg])) return;
 				$value = $value[$seg];
 				$seg = strtok('.');
 			}
-			if(is_array($value)){
+			if (is_array($value)) {
 				return new self($value);
-			}else{
+			} else {
 				return $value;
 			}
 		}
@@ -80,9 +90,9 @@ final class Yaf_Config_Ini extends Yaf_Config_Abstract
 	public function current()
 	{
 		$value = current($this->_config);
-		if(is_array($value)){
+		if (is_array($value)) {
 			return new self($value);
-		}else{
+		} else {
 			return $value;
 		}
 	}
@@ -102,11 +112,11 @@ final class Yaf_Config_Ini extends Yaf_Config_Abstract
 	 */
 	private static function _parser_cb($filepath, $section){
 		$config = parse_ini_file($filepath, true);
-		if($config && is_array($config)){
-			foreach($config as $key => $value){
+		if ($config && is_array($config)) {
+			foreach ($config as $key => $value) {
 				if($seg = ltrim(strchr($key, ':'), ': ')){
-					while($token = ltrim(strrchr($seg, ':'), ': ')){
-						if(isset($config[$token])){
+					while ($token = ltrim(strrchr($seg, ':'), ': ')) {
+						if (isset($config[$token])) {
 							$value = array_merge($config[$token], $value);
 						}
 						$seg = substr($seg, 0, -strlen($token));
@@ -114,16 +124,16 @@ final class Yaf_Config_Ini extends Yaf_Config_Abstract
 					}
 
 					$token = rtrim($seg, ': ');
-					if(isset($config[$token])){
+					if (isset($config[$token])) {
 						$value = array_merge($config[$token], $value);
 					}
 
-					if($key = trim(strtok($key, ':'))){
+					if ($key = trim(strtok($key, ':'))) {
 						$config[$key] = $value;
 					}
 				}
 
-				if(trim($key) == $section){
+				if (trim($key) == $section) {
 					return self::_simple_parser_cb($value);
 				}
 			}
@@ -139,11 +149,11 @@ final class Yaf_Config_Ini extends Yaf_Config_Abstract
 	private static function _simple_parser_cb($simple){
 		if(!is_array($simple)) return;
 		
-		foreach($simple as $key => $value){
-			if($seg = strtok($key, '.')){
-				if($subkey = ltrim(strchr($key, '.'), '.')){
+		foreach ($simple as $key => $value) {
+			if ($seg = strtok($key, '.')) {
+				if ($subkey = ltrim(strchr($key, '.'), '.')) {
 					$value = array($subkey => $value);
-					if(isset($simple[$seg]) && is_array($simple[$seg])){
+					if (isset($simple[$seg]) && is_array($simple[$seg])) {
 						$value = array_merge($simple[$seg], $value);
 					}
 					$simple[$seg] = self::_simple_parser_cb($value);

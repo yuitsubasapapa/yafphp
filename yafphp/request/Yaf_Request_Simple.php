@@ -1,7 +1,17 @@
 <?php
+// +----------------------------------------------------------------------
+// | yafphp [ Yaf PHP Framework ]
+// +----------------------------------------------------------------------
+// | Copyright (c) 2013 http://yafphp.duapp.com All rights reserved.
+// +----------------------------------------------------------------------
+// | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
+// +----------------------------------------------------------------------
+// | Author: baoqiang <zmrnet@qq.com>
+// +----------------------------------------------------------------------
+
 final class Yaf_Request_Simple extends Yaf_Request_Abstract
 {
-	public function __construct ( $module , $controller , $action , $method , $params = NULL )
+	public function __construct ($module, $controller, $action, $method, $params = NULL)
 	{
 
 	}
