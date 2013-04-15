@@ -10,7 +10,7 @@ defined('YAF_ENVIRON') or define('YAF_ENVIRON', 'develop');
 // yafphp
 class_exists('Yaf_Application') or require(dirname(__FILE__) . '/../yafphp/yafphp.php');
 // yafphp use namespace
-//class_exists('Yaf\Application') or require(dirname(__FILE__) . '/yafpns/yafpns.php');
+//class_exists('Yaf\Application') or require(dirname(__FILE__) . '/../yafpns/yafpns.php');
 
 define('APP_PATH',  realpath(dirname(__FILE__)));
 
