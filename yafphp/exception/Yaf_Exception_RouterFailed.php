@@ -6,10 +6,10 @@
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
-// | Author: zmrnet <zmrnet@qq.com>
+// | Author: baoqiang <zmrnet@qq.com>
 // +----------------------------------------------------------------------
 
 class Yaf_Exception_RouterFailed extends Yaf_Exception
 {
-	protected $code = YAF_ERR_ROUTER_FAILED;
+	protected $code = YAF_ERR_ROUTE_FAILED;
 }

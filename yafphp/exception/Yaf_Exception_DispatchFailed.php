@@ -6,7 +6,7 @@
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
-// | Author: zmrnet <zmrnet@qq.com>
+// | Author: baoqiang <zmrnet@qq.com>
 // +----------------------------------------------------------------------
 
 class Yaf_Exception_DispatchFailed extends Yaf_Exception

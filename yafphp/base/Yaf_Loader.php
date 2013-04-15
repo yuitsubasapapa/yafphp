@@ -94,7 +94,11 @@ final class Yaf_Loader
 	 */
 	public static function import($file_name)
 	{
-
+		if (is_file($file_name) && is_readable($file_name)) {
+			require_once($file_name);
+			return true;
+		}
+		return false;
 	}
 	
 }

@@ -6,7 +6,7 @@
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
-// | Author: zmrnet <zmrnet@qq.com>
+// | Author: baoqiang <zmrnet@qq.com>
 // +----------------------------------------------------------------------
 
 class Yaf_Exception_LoadFailed_Module extends Yaf_Exception_LoadFailed

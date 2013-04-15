@@ -23,7 +23,6 @@ final class Yaf_Application
 	private $_g = array(
 		'directory' => '',
 		'ext' => 'php',
-		'bootstrap' => '/Bootstrap.php',
 		'global_library' => YAF_LIBRARY,
 		'local_library' => null,
 		'local_namespaces' => '',
@@ -35,6 +34,7 @@ final class Yaf_Application
 		'default_route' => array(),
 		'throw_exception' => true,
 		'catch_exception' => false,
+		'in_exception' => false,
 		'modules' => array(),
 	);
 
@@ -44,12 +44,12 @@ final class Yaf_Application
 	 */
 	public function __construct($config, $section = null)
 	{
-		if (empty($config)) return;
+		if (empty($config)) return false;
 
 		if (!is_null(self::$_app)) {
 			unset($this);
 			throw new Yaf_Exception_StartupError('Only one application can be initialized');
-			return;
+			return false;
 		}
 
 		if (empty($section)) {
@@ -69,7 +69,7 @@ final class Yaf_Application
 				|| $this->_parse_option() == false) {
 			unset($this);
 			throw new Yaf_Exception_StartupError('Initialization of application config failed');
-			return;
+			return false;
 		}
 
 		$request = new Yaf_Request_Http(null, $this->_g['base_uri']);
@@ -77,16 +77,16 @@ final class Yaf_Application
 
 		if(!$request){
 			throw new Yaf_Exception_StartupError('Initialization of request failed');
-			return;
+			return false;
 		}
 
-		$this->_dispatcher = new Yaf_Dispatcher();
+		$this->_dispatcher = new Yaf_Dispatcher($this->_g);
 		if (is_null($this->_dispatcher)
 				|| !is_object($this->_dispatcher)
 				|| !($this->_dispatcher instanceof Yaf_Dispatcher)) {
 			unset($this);
 			throw new Yaf_Exception_StartupError('Instantiation of application dispatcher failed');
-			return;
+			return false;
 		}
 		$this->_dispatcher->setRequest($request);
 
@@ -101,7 +101,7 @@ final class Yaf_Application
 		if (!$loader) {
 			unset($this);
 			throw new Yaf_Exception_StartupError('Initialization of application auto loader failed');
-			return;
+			return false;
 		}
 
 		$this->_run = false;
@@ -123,6 +123,38 @@ final class Yaf_Application
 	 */
 	public function bootstrap()
 	{
+		$retval = true;
+		if (!class_exists('Bootstrap')) {
+			if (isset($this->_g['bootstrap'])) {
+				$bootstrap_path = $this->_g['bootstrap'];
+			} else {
+				$bootstrap_path = $this->_g['directory'] . '/Bootstrap.' . $this->_g['ext'];
+			}
+
+			if (!Yaf_Loader::import($bootstrap_path)) {
+				throw new Exception('Couldn\'t find bootstrap file ' . $bootstrap_path, E_WARNING);
+				return false;
+			} elseif (!class_exists('Bootstrap')) {
+				throw new Exception('Couldn\'t find class Bootstrap in ' . $bootstrap_path, E_WARNING);
+				return false;
+			} else {
+				$bootstrap = new Bootstrap();
+				if (!($bootstrap instanceof Yaf_Bootstrap_Abstract)) {
+					throw new Exception('Expect a Yaf_Bootstrap_Abstract instance, Bootstrap give');
+					return false;
+				}
+			}
+		}
+
+		$methods = get_class_methods($bootstrap);
+		foreach ($methods as $func) {
+			if (strncasecmp($func, '_init', 5)) {
+				continue;
+			}
+			call_user_func(array($bootstrap, $func), $this->_dispatcher);
+		}
+		unset($bootstrap);
+
 		return $this;
 	}
 
@@ -132,8 +164,20 @@ final class Yaf_Application
 	 */
 	public function run()
 	{
-		//unset($this->_g);
-		return $this;
+		unset($this->_g);
+		
+		if (is_bool($this->_run) && $this->_run) {
+			throw new Yaf_Exception_StartupError('An application instance already run');
+			return true;
+		}
+
+		$this->_run = true;
+
+		if ($response = $this->_dispatcher->dispatch($this->_dispatcher->getRequest())) {
+			return $response;
+		}
+
+		return false;
 	}
 
 	/**
@@ -229,8 +273,6 @@ final class Yaf_Application
 
 		if (isset($app->bootstrap) && is_string($app->bootstrap)) {
 			$this->_g['bootstrap'] = $app->bootstrap;
-		} else {
-			$this->_g['bootstrap'] = $this->_g['directory'] . $this->_g['bootstrap'];
 		}
 
 		if (isset($app->library)) {
@@ -294,6 +336,7 @@ final class Yaf_Application
 		if (isset($app->modules) && is_string($app->modules)) {
 			$seg = strtok($app->modules, ',');
 			while ($seg) {
+				$seg = trim($seg);
 				if (strlen($seg)) {
 					$this->_g['modules'][] = $seg;
 				}

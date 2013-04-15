@@ -25,7 +25,7 @@ final class Yaf_Config_Simple extends Yaf_Config_Abstract
 			}
 		} else {
 			throw new Yaf_Exception_TypeError('Invalid parameters provided, must be an array');
-			return;
+			return false;
 		}
 	}
 

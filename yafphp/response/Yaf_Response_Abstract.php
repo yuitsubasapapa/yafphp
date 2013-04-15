@@ -6,7 +6,7 @@
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
-// | Author: zmrnet <zmrnet@qq.com>
+// | Author: baoqiang <zmrnet@qq.com>
 // +----------------------------------------------------------------------
 
 abstract class Yaf_Response_Abstract
@@ -14,42 +14,74 @@ abstract class Yaf_Response_Abstract
 	protected $_body = array();
 	protected $_header = array();
 	
-	public function setBody ( $body, $name = NULL )
+	/**
+	 * setBody
+	 *
+	 */
+	public function setBody($body, $name = null)
 	{
 
 	}
 
-	public function prependBody ( $body, $name = NULL )
+	/**
+	 * prependBody
+	 *
+	 */
+	public function prependBody($body, $name = null)
 	{
 
 	}
 
-	public function appendBody ( $body, $name = NULL )
+	/**
+	 * appendBody
+	 *
+	 */
+	public function appendBody($body, $name = null)
 	{
 
 	}
 
-	public function clearBody ()
+	/**
+	 * clearBody
+	 *
+	 */
+	public function clearBody()
 	{
 
 	}
 
-	public function getBody ()
+	/**
+	 * getBody
+	 *
+	 */
+	public function getBody()
 	{
 
 	}
 
-	public function response ()
+	/**
+	 * response
+	 *
+	 */
+	public function response()
 	{
 
 	}
 
-	public function setRedirect ($url )
+	/**
+	 * setRedirect
+	 *
+	 */
+	public function setRedirect($url)
 	{
 
 	}
 
-	public function __toString ()
+	/**
+	 * __toString
+	 *
+	 */
+	public function __toString()
 	{
 
 	}

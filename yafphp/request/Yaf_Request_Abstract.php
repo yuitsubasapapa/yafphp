@@ -6,126 +6,300 @@
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
-// | Author: zmrnet <zmrnet@qq.com>
+// | Author: baoqiang <zmrnet@qq.com>
 // +----------------------------------------------------------------------
 
 abstract class Yaf_Request_Abstract
 {
-	protected $_method ;
-	protected $_module ;
-	protected $_controller ;
-	protected $_action ;
+	protected $_method;
+	protected $_module;
+	protected $_controller;
+	protected $_action;
 	protected $_params = array();
-	protected $_language ;
-	protected $_base_uri ;
-	protected $_request_uri ;
-	protected $_dispatched ;
-	protected $_routed ;
+	protected $_language;
+	protected $_base_uri;
+	protected $_request_uri;
+	protected $_dispatched = false;
+	protected $_routed = false;
 
-	public function getModuleName ()
+	private $_exception;
+	
+	/**
+	 * getModuleName
+	 *
+	 */
+	public function getModuleName()
 	{
-
+		return $this->_module;
 	}
-
-	public function getControllerName ()
+	
+	/**
+	 * getControllerName
+	 *
+	 */
+	public function getControllerName()
 	{
-
+		return $this->_controller;
 	}
-
-	public function getActionName ()
+	
+	/**
+	 * getActionName
+	 *
+	 */
+	public function getActionName()
 	{
-
+		return $this->_action;
 	}
-
-	public function setModuleName ($name )
+	
+	/**
+	 * setModuleName
+	 *
+	 */
+	public function setModuleName($name)
 	{
-
+		if (!is_string($name)) {
+			throw new Yaf_Exception('Expect a string module name', E_WARNING);
+			return false;
+		}
+		$this->_module = $name;
+		return $this;
 	}
-
-	public function setControllerName ($name )
+	
+	/**
+	 * setControllerName
+	 *
+	 */
+	public function setControllerName($name)
 	{
-
+		if (!is_string($name)) {
+			throw new Yaf_Exception('Expect a string controller name', E_WARNING);
+			return false;
+		}
+		$this->_controller = $name;
+		return $this;
 	}
-
-	public function setActionName ($name )
+	
+	/**
+	 * setActionName
+	 *
+	 */
+	public function setActionName($name)
 	{
+		if (!is_string($name)) {
+			throw new Yaf_Exception('Expect a string action name', E_WARNING);
+			return false;
+		}
 
+		$this->_action = $name;
+
+		return $this;
 	}
-
-	public function getException ()
+	
+	/**
+	 * getException
+	 *
+	 */
+	public function getException()
 	{
+		if (is_object($this->_exception)
+				&& ($this->_exception instanceof Exception)) {
+			return $this->_exception;
+		}
 
+		return null;
 	}
-
-	public function getParams ()
+	
+	/**
+	 * getParams
+	 *
+	 */
+	public function getParams()
 	{
-
+		return $this->_params;
 	}
-
-	public function getParam ($name,$dafault = NULL )
+	
+	/**
+	 * getParam
+	 *
+	 */
+	public function getParam($name, $dafault = null)
 	{
+		if (isset($this->_params[$name])) {
+			return $this->_params[$name];
+		}
 
+		if (!is_null($dafault)) {
+			return $dafault;
+		}
+
+		return null;
 	}
-
-	public function setParam ($name, $value )
+	
+	/**
+	 * setParam
+	 *
+	 */
+	public function setParam($name, $value = null)
 	{
+		if (is_null($value)) {
+			if (is_array($name)) {
+				$this->_params = array_merge($this->_params, $name);
+				return $this;
+			}
+		} elseif(is_string($name)) {
+			$this->_params[$name] = $value;
+			return $this;
+		}
 
+		return false;
 	}
-
-	public function getMethod ()
+	
+	/**
+	 * getMethod
+	 *
+	 */
+	public function getMethod()
 	{
-
+		return $this->_method;
 	}
-
-	public function isDispatched ()
+	
+	/**
+	 * isDispatched
+	 *
+	 */
+	public function isDispatched()
 	{
-
+		return $this->_dispatched;
 	}
-
-	public function setDispatched ()
+	
+	/**
+	 * setDispatched
+	 *
+	 */
+	public function setDispatched($flag = true)
 	{
+		if (is_bool($flag) && $flag == false) {
+			$this->_dispatched = false;
+		} else {
+			$this->_dispatched = true;
+		}
 
+		return true;
 	}
-
-	public function isRouted ()
+	
+	/**
+	 * isRouted
+	 *
+	 */
+	public function isRouted()
 	{
-
+		return $this->_routed;
 	}
-
-	public function setRouted ()
+	
+	/**
+	 * setRouted
+	 *
+	 */
+	public function setRouted($flag = true)
 	{
+		if (is_bool($flag) && $flag == false) {
+			$this->_routed = false;
+		} else {
+			$this->_routed = true;
+		}
 
+		return $this;
 	}
 
 	
-	abstract public function getLanguage ();
-
-	abstract public function getQuery ( $name = NULL );
-
-	abstract public function getPost ( $name = NULL );
-
-	abstract public function getEnv ($name = NULL );
-
-	abstract public function getServer ($name = NULL );
-
-	abstract public function getCookie ($name = NULL );
-
-	abstract public function getFiles ($name = NULL );
-
-	abstract public function isGet ();
-
-	abstract public function isPost ();
-
-	abstract public function isHead ();
-
-	abstract public function isXmlHttpRequest ();
-
-	abstract public function isPut ();
-
-	abstract public function isDelete ();
-
-	abstract public function isOption ();
-
-	abstract public function isCli ();
+	/**
+	 * getLanguage
+	 *
+	 */
+	abstract public function getLanguage();
+	
+	/**
+	 * getQuery
+	 *
+	 */
+	abstract public function getQuery($name = null);
+	
+	/**
+	 * getPost
+	 *
+	 */
+	abstract public function getPost($name = null);
+	
+	/**
+	 * getEnv
+	 *
+	 */
+	abstract public function getEnv($name = null);
+	
+	/**
+	 * getServer
+	 *
+	 */
+	abstract public function getServer($name = null);
+	
+	/**
+	 * getCookie
+	 *
+	 */
+	abstract public function getCookie($name = null);
+	
+	/**
+	 * getFiles
+	 *
+	 */
+	abstract public function getFiles($name = null);
+	
+	/**
+	 * isGet
+	 *
+	 */
+	abstract public function isGet();
+	
+	/**
+	 * isPost
+	 *
+	 */
+	abstract public function isPost();
+	
+	/**
+	 * isHead
+	 *
+	 */
+	abstract public function isHead();
+	
+	/**
+	 * isXmlHttpRequest
+	 *
+	 */
+	abstract public function isXmlHttpRequest();
+	
+	/**
+	 * isPut
+	 *
+	 */
+	abstract public function isPut();
+	
+	/**
+	 * isDelete
+	 *
+	 */
+	abstract public function isDelete();
+	
+	/**
+	 * isOptions
+	 *
+	 */
+	abstract public function isOptions();
+	
+	/**
+	 * isCli
+	 *
+	 */
+	abstract public function isCli();
 
 }

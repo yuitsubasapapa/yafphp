@@ -25,19 +25,19 @@ final class Yaf_Config_Ini extends Yaf_Config_Abstract
 					$this->_config = self::_parser_cb($config, $section);
 					if ($this->_config == false || !is_array($this->_config)) {
 						throw new Exception('Parsing ini file '. $config .' failed', E_ERROR);
-						return;
+						return false;
 					}
 				} else {
 					throw new Exception('Argument is not a valid ini file '. $config, E_ERROR);
-					return;
+					return false;
 				}
 			} else {
 				throw new Exception('Unable to find config file '. $config, E_ERROR);
-				return;
+				return false;
 			}
 		} else {
 			throw new Exception('Invalid parameters provided, must be path of ini file', E_ERROR);
-			return;
+			return false;
 		}
 	}
 	
@@ -130,17 +130,17 @@ final class Yaf_Config_Ini extends Yaf_Config_Abstract
 
 					unset($config[$key]);
 
-					$key = trim(strtok($key, ':'));
+					if ($key = trim(strtok($key, ':'))) {
+						$config[$key] = $value;
+					}
 				}
-
-				$config[$key] = self::_simple_parser_cb($value);
 
 				if (is_string($section) && ($key == $section)) {
 					return self::_simple_parser_cb($value);
 				}
 			}
 
-			return $config;
+			return self::_simple_parser_cb($config);
 		}
 
 		return false;
@@ -162,6 +162,8 @@ final class Yaf_Config_Ini extends Yaf_Config_Abstract
 					}
 					$simple[$seg] = self::_simple_parser_cb($value);
 					unset($simple[$key]);
+				} elseif(is_array($value)) {
+					$simple[$key] = self::_simple_parser_cb($value);
 				}
 			}
 		}

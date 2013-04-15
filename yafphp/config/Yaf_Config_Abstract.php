@@ -31,7 +31,7 @@ abstract class Yaf_Config_Abstract implements Iterator, ArrayAccess, Countable
 		}
 
 		throw new Yaf_Exception_TypeError('Expects a string or an array as parameter');
-		return;
+		return false;
 	}
 
 
