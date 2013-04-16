@@ -38,34 +38,11 @@ defined('YAF_USE_SPL_AUTOLOAD') or define('YAF_USE_SPL_AUTOLOAD', true);
 // yafphp debug
 defined('YAF_DEBUG') or define('YAF_DEBUG', false);
 
-// yafphp_debug
-$yafphp_debug = array(
-	'logs' => array(),
-	'time' => YAF_RUNTIME,
-);
-
-function yafphp_debug($message = null)
-{
-	global $yafphp_debug;
-
-	if (is_null($message)) {
-		$runtime = round((microtime(true) - YAF_RUNTIME) * 1000, 2);
-		$message = 'runtime:' . $runtime . 'ms';
-	}
-
-	$microtime = microtime(true);
-	$runtime = round(($microtime - $yafphp_debug['time']) * 1000, 2);
-	$yafphp_debug['logs'][] = '[' . $runtime . 'ms] ' . $message;
-	$yafphp_debug['time'] = $microtime;
-
-	return $yafphp_debug;
-}
-
 // yafphp autoload
 function __autoload($classname)
 {
 	// debug
-	yafphp_debug("__autoload($classname)");
+	//Yaf_Debug::log('__autoload');
 
 	$classfile = $classname;
 	if (strtok($classfile, '_') == 'Yaf')  // yafphp core class
@@ -78,6 +55,8 @@ function __autoload($classname)
 			if (is_file($classpath)) include($classpath);
 		}
 	}
+	// debug
+	//Yaf_Debug::log('__autoload', "__autoload($classname)");
 
 	return class_exists($classname, false) || interface_exists($classname, false);
 }
