@@ -9,6 +9,10 @@
 // | Author: baoqiang <zmrnet@qq.com>
 // +----------------------------------------------------------------------
 
+// yafphp runtime
+defined('YAF_RUNTIME') or define('YAF_RUNTIME', microtime(true));
+
+// yafphp constant
 define('YAF_VERSION', '1.0.0');
 define('YAF_ERR_STARTUP_FAILED', 512);
 define('YAF_ERR_ROUTE_FAILED', 513);
@@ -21,16 +25,18 @@ define('YAF_ERR_CALL_FAILED', 519);
 define('YAF_ERR_AUTOLOAD_FAILED', 520);
 define('YAF_ERR_TYPE_ERROR', 521);
 
+// yafphp config constant
 defined('YAF_ENVIRON') or define('YAF_ENVIRON', 'product');
-defined('YAF_LIBRARY') or define('YAF_LIBRARY', NULL);
-defined('YAF_NAME_SUFFIX') or define('YAF_NAME_SUFFIX', TRUE);
+defined('YAF_LIBRARY') or define('YAF_LIBRARY', null);
+defined('YAF_NAME_SUFFIX') or define('YAF_NAME_SUFFIX', true);
 defined('YAF_NAME_SEPARATOR') or define('YAF_NAME_SEPARATOR', '');
 defined('YAF_FORWARD_LIMIT') or define('YAF_FORWARD_LIMIT', 5);
-defined('YAF_CACHE_CONFIG') or define('YAF_CACHE_CONFIG', FALSE);
-defined('YAF_USE_NAMESPACE') or define('YAF_USE_NAMESPACE', FALSE);
-defined('YAF_USE_SPL_AUTOLOAD') or define('YAF_USE_SPL_AUTOLOAD', TRUE);
+defined('YAF_CACHE_CONFIG') or define('YAF_CACHE_CONFIG', false);
+defined('YAF_USE_NAMESPACE') or define('YAF_USE_NAMESPACE', false);
+defined('YAF_USE_SPL_AUTOLOAD') or define('YAF_USE_SPL_AUTOLOAD', true);
 
-defined('YAF_DEBUG') or define('YAF_DEBUG', TRUE);
+// yafphp debug
+defined('YAF_DEBUG') or define('YAF_DEBUG', false);
 
 // yafphp autoload
 function __autoload($classname)

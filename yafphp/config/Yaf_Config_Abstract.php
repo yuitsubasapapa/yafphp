@@ -81,7 +81,7 @@ abstract class Yaf_Config_Abstract implements Iterator, ArrayAccess, Countable
 	{
 		if ($this->_readonly) return;
 		if (is_string($name)) $this->_config[$name] = $value;
-		throw new Exception('Expect a string key name', E_WARNING);
+		trigger_error('Expect a string key name', E_USER_WARNING);
 	}
 
 	/**
@@ -128,7 +128,7 @@ abstract class Yaf_Config_Abstract implements Iterator, ArrayAccess, Countable
 	{
 		if ($this->_readonly) return;
 		if (is_string($name)) unset($this->_config[$name]);
-		throw new Exception('Expect a string key name', E_WARNING);
+		trigger_error('Expect a string key name', E_USER_WARNING);
 	}
 
 	/**

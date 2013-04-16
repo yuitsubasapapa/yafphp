@@ -164,7 +164,7 @@ final class Yaf_Dispatcher
 	public function setRequest($request)
 	{
 		if (!is_object($request) || !($request instanceof Yaf_Request_Abstract)) {
-			throw new Exception('Expects a Yaf_Request_Abstract instance', E_WARNING);
+			trigger_error('Expects a Yaf_Request_Abstract instance', E_USER_WARNING);
 			return false;
 		}
 		

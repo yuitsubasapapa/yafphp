@@ -39,8 +39,20 @@ final class Yaf_Application
 	);
 
 	/**
-	 * __construct
+	 * __destruct
 	 *
+	 */
+	public function __destruct()
+	{
+		$runtime = round((microtime(true) - YAF_RUNTIME) * 1000, 2);
+		echo "<br>[{$runtime}ms]";
+	}
+
+	/**
+	 * __construct
+	 * 
+	 * @param mixed $config
+	 * @param string $section
 	 */
 	public function __construct($config, $section = null)
 	{
@@ -132,15 +144,15 @@ final class Yaf_Application
 			}
 
 			if (!Yaf_Loader::import($bootstrap_path)) {
-				throw new Exception('Couldn\'t find bootstrap file ' . $bootstrap_path, E_WARNING);
+				trigger_error('Couldn\'t find bootstrap file ' . $bootstrap_path, E_USER_WARNING);
 				return false;
 			} elseif (!class_exists('Bootstrap')) {
-				throw new Exception('Couldn\'t find class Bootstrap in ' . $bootstrap_path, E_WARNING);
+				trigger_error('Couldn\'t find class Bootstrap in ' . $bootstrap_path, E_USER_WARNING);
 				return false;
 			} else {
 				$bootstrap = new Bootstrap();
 				if (!($bootstrap instanceof Yaf_Bootstrap_Abstract)) {
-					throw new Exception('Expect a Yaf_Bootstrap_Abstract instance, Bootstrap give');
+					trigger_error('Expect a Yaf_Bootstrap_Abstract instance, Bootstrap give', E_USER_WARNING);
 					return false;
 				}
 			}
@@ -229,9 +241,40 @@ final class Yaf_Application
 	 * execute
 	 *
 	 */
-	public function execute($funcion, $parameter = null)
+	public function execute($function, $parameter = null)
 	{
+		if (!is_string($function) && !is_array($function)) {
+			$function = (string) $function;
+		}
 
+		if (!is_callable($function)) {
+			trigger_error('First argument is expected to be a valid callback', E_USER_WARNING);
+			return null;
+		}
+
+		$arguments = func_get_args();
+		array_shift($arguments);
+		if (($retval = call_user_func_array($function, $arguments)) == false) {
+			$numargs = func_num_args();
+			$function = is_array($function) ? implode('::', $function) : $function;
+			if ($numargs > 1) {
+				$arguments1 = (string) $arguments[0];
+				if ($numargs > 2) {
+					$arguments2 = (string) $arguments[1];
+					if ($numargs > 3) {
+						trigger_error("Unable to call {$function}({$arguments1},{$arguments2},...)", E_USER_WARNING);
+					} else {
+						trigger_error("Unable to call {$function}({$arguments1},{$arguments2})", E_USER_WARNING);
+					}
+				} else {
+					trigger_error("Unable to call {$function}({$arguments1})", E_USER_WARNING);
+				}
+			} else {
+				trigger_error("Unable to call {$function}()", E_USER_WARNING);
+			}
+		}
+
+		return $retval;
 	}
 
 	/**
@@ -355,62 +398,4 @@ final class Yaf_Application
 		return true;
 	}
 
-/*
-	public function __construct($config)
-	{
-		Yaf::setApplication($this);
-
-		if(is_string($config))
-			$config = require($config);
-
-		$this->configure($config);
-		$this->_dispatcher = Yaf_Dispatcher::getInstance();
-		Yaf::setInclude('app.library', $this->_library);
-
-	}
-
-	public function configure($config)
-	{
-		if(isset($config['application']))
-		{
-			if(is_array($config['application']))
-			{
-				foreach($config['application'] as $key => $value)
-					$this->{'_' . $key} = $value;
-			}
-			unset($config['application']);
-		}
-
-		if(is_array($config))
-		{
-			foreach($config as $key => $value)
-				$this->$key = $value;
-		}
-	}
-
-	public function bootstrap($bootstrap = null)
-	{
-		if($bootstrap instanceof Yaf_Bootstrap_Abstract){
-			$bootmethods = get_class_methods($bootstrap);
-		}elseif(is_file($this->_bootstrap)){
-			require($this->_bootstrap);
-			$bootstrap = new Bootstrap();
-			$bootmethods = get_class_methods($bootstrap);
-		}
-		if(is_array($bootmethods)){
-			foreach($bootmethods as $method){
-				if(substr($method, 0, 5) == '_init' && method_exists($bootstrap, $method))
-					$bootstrap->$method($this->_dispatcher);
-			}
-			unset($bootstrap);
-		}
-
-		return $this;
-	}
-
-	public function run()
-	{
-		return $this;
-	}
-	*/
 }

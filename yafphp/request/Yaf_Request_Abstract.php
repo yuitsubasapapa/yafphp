@@ -58,7 +58,7 @@ abstract class Yaf_Request_Abstract
 	public function setModuleName($name)
 	{
 		if (!is_string($name)) {
-			throw new Yaf_Exception('Expect a string module name', E_WARNING);
+			trigger_error('Expect a string module name', E_USER_WARNING);
 			return false;
 		}
 		$this->_module = $name;
@@ -72,7 +72,7 @@ abstract class Yaf_Request_Abstract
 	public function setControllerName($name)
 	{
 		if (!is_string($name)) {
-			throw new Yaf_Exception('Expect a string controller name', E_WARNING);
+			trigger_error('Expect a string controller name', E_USER_WARNING);
 			return false;
 		}
 		$this->_controller = $name;
@@ -86,7 +86,7 @@ abstract class Yaf_Request_Abstract
 	public function setActionName($name)
 	{
 		if (!is_string($name)) {
-			throw new Yaf_Exception('Expect a string action name', E_WARNING);
+			trigger_error('Expect a string action name', E_USER_WARNING);
 			return false;
 		}
 
