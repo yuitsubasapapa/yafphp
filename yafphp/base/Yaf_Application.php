@@ -44,8 +44,13 @@ final class Yaf_Application
 	 */
 	public function __destruct()
 	{
-		$runtime = round((microtime(true) - YAF_RUNTIME) * 1000, 2);
-		echo "<br>[{$runtime}ms]";
+		// debug
+		yafphp_debug('$app->__destruct()');
+
+		if (YAF_DEBUG) {
+			echo '<hr><pre>';
+			print_r(yafphp_debug());
+		}
 	}
 
 	/**
@@ -56,6 +61,9 @@ final class Yaf_Application
 	 */
 	public function __construct($config, $section = null)
 	{
+		// debug
+		yafphp_debug('$app->__construct()');
+
 		if (empty($config)) return false;
 
 		if (!is_null(self::$_app)) {
@@ -135,6 +143,9 @@ final class Yaf_Application
 	 */
 	public function bootstrap()
 	{
+		// debug
+		yafphp_debug('$app->bootstrap()');
+
 		$retval = true;
 		if (!class_exists('Bootstrap')) {
 			if (isset($this->_g['bootstrap'])) {
@@ -176,8 +187,9 @@ final class Yaf_Application
 	 */
 	public function run()
 	{
-		unset($this->_g);
-		
+		// debug
+		yafphp_debug('$app->run()');
+
 		if (is_bool($this->_run) && $this->_run) {
 			throw new Yaf_Exception_StartupError('An application instance already run');
 			return true;
