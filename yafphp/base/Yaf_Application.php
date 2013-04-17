@@ -15,10 +15,13 @@ final class Yaf_Application
 
 	protected $_config = null;
 	protected $_dispatcher;
-	protected $_environ = YAF_ENVIRON;
 	protected $_modules = array();
 
 	protected $_run = false;
+	protected $_environ = YAF_ENVIRON;
+
+	protected $_err_no = 0;
+	protected $_err_msg = '';
 
 	private $_g = array(
 		'directory' => '',
@@ -37,15 +40,6 @@ final class Yaf_Application
 		'in_exception' => false,
 		'modules' => array(),
 	);
-
-	/**
-	 * __destruct
-	 *
-	 */
-	public function __destruct()
-	{
-
-	}
 
 	/**
 	 * __construct
@@ -67,6 +61,7 @@ final class Yaf_Application
 			$section = $this->_environ;
 		}
 
+		// yaf_config_instance
 		if (is_string($config)) {
 			$this->_config = new Yaf_Config_Ini($config, $section);
 		}
@@ -91,7 +86,7 @@ final class Yaf_Application
 			return false;
 		}
 
-		$this->_dispatcher = new Yaf_Dispatcher($this->_g);
+		$this->_dispatcher = Yaf_Dispatcher::getInstance($this->_g);
 		if (is_null($this->_dispatcher)
 				|| !is_object($this->_dispatcher)
 				|| !($this->_dispatcher instanceof Yaf_Dispatcher)) {
@@ -128,9 +123,99 @@ final class Yaf_Application
 		self::$_app = $this;
 	}
 
+
+	/**
+	 * run
+	 *
+	 * @param void
+	 * @return mixed
+	 */
+	public function run()
+	{
+		if (is_bool($this->_run) && $this->_run) {
+			throw new Yaf_Exception_StartupError('An application instance already run');
+			return true;
+		}
+
+		$this->_run = true;
+
+		if ($response = $this->_dispatcher->dispatch($this->_dispatcher->getRequest())) {
+			return $response;
+		}
+
+		return false;
+	}
+
+	/**
+	 * execute
+	 *
+	 * @param callback $function
+	 * @param mixed $parameter
+	 * @return mixed
+	 */
+	public function execute($function, $parameter = null)
+	{
+		if (!is_string($function) && !is_array($function)) {
+			$function = (string) $function;
+		}
+
+		if (!is_callable($function)) {
+			trigger_error('First argument is expected to be a valid callback', E_USER_WARNING);
+			return null;
+		}
+
+		$arguments = func_get_args();
+		array_shift($arguments);
+		if (($retval = call_user_func_array($function, $arguments)) == false) {
+			$numargs = func_num_args();
+			$function = is_array($function) ? implode('::', $function) : (string) $function;
+			if ($numargs > 1) {
+				$arguments1 = (string) $arguments[0];
+				if ($numargs > 2) {
+					$arguments2 = (string) $arguments[1];
+					if ($numargs > 3) {
+						trigger_error("Unable to call {$function}({$arguments1},{$arguments2},...)", E_USER_WARNING);
+					} else {
+						trigger_error("Unable to call {$function}({$arguments1},{$arguments2})", E_USER_WARNING);
+					}
+				} else {
+					trigger_error("Unable to call {$function}({$arguments1})", E_USER_WARNING);
+				}
+			} else {
+				trigger_error("Unable to call {$function}()", E_USER_WARNING);
+			}
+		}
+
+		return $retval;
+	}
+
+	/**
+	 * app
+	 *
+	 * @param void
+	 * @return Yaf_Application
+	 */
+	public static function app()
+	{
+		return self::$_app;
+	}
+
+	/**
+	 * environ
+	 *
+	 * @param void
+	 * @return string
+	 */
+	public function environ()
+	{
+		return $this->_environ;
+	}
+
 	/**
 	 * bootstrap
 	 *
+	 * @param void
+	 * @return Yaf_Application
 	 */
 	public function bootstrap()
 	{
@@ -170,28 +255,10 @@ final class Yaf_Application
 	}
 
 	/**
-	 * run
-	 *
-	 */
-	public function run()
-	{
-		if (is_bool($this->_run) && $this->_run) {
-			throw new Yaf_Exception_StartupError('An application instance already run');
-			return true;
-		}
-
-		$this->_run = true;
-
-		if ($response = $this->_dispatcher->dispatch($this->_dispatcher->getRequest())) {
-			return $response;
-		}
-
-		return false;
-	}
-
-	/**
 	 * getConfig
 	 *
+	 * @param void
+	 * @return Yaf_Config_Abstract
 	 */
 	public function getConfig()
 	{
@@ -199,17 +266,10 @@ final class Yaf_Application
 	}
 
 	/**
-	 * getDispatcher
-	 *
-	 */
-	public function getDispatcher()
-	{
-		return $this->_dispatcher;
-	}
-
-	/**
 	 * geModules
 	 *
+	 * @param void
+	 * @return array
 	 */
 	public function geModules()
 	{
@@ -217,66 +277,125 @@ final class Yaf_Application
 	}
 
 	/**
-	 * app
+	 * getDispatcher
 	 *
+	 * @param void
+	 * @return Yaf_Dispatcher
 	 */
-	public static function app()
+	public function getDispatcher()
 	{
-		return self::$_app;
+		return $this->_dispatcher;
 	}
 
 	/**
-	 * environ
+	 * setAppDirectory
 	 *
+	 * @param string $directory
+	 * @return Yaf_Application
 	 */
-	public function environ()
+	public function setAppDirectory($directory)
 	{
-		return $this->_environ;
+		if (is_string($directory)
+				&& ($directory = realpath($directory))) {
+			$this->_g['directory'] = $directory;
+		}
+
+		return $this;
 	}
 
 	/**
-	 * execute
+	 * getAppDirectory
 	 *
+	 * @param void
+	 * @return string
 	 */
-	public function execute($function, $parameter = null)
+	public function getAppDirectory()
 	{
-		if (!is_string($function) && !is_array($function)) {
-			$function = (string) $function;
-		}
-
-		if (!is_callable($function)) {
-			trigger_error('First argument is expected to be a valid callback', E_USER_WARNING);
-			return null;
-		}
-
-		$arguments = func_get_args();
-		array_shift($arguments);
-		if (($retval = call_user_func_array($function, $arguments)) == false) {
-			$numargs = func_num_args();
-			$function = is_array($function) ? implode('::', $function) : (string) $function;
-			if ($numargs > 1) {
-				$arguments1 = (string) $arguments[0];
-				if ($numargs > 2) {
-					$arguments2 = (string) $arguments[1];
-					if ($numargs > 3) {
-						trigger_error("Unable to call {$function}({$arguments1},{$arguments2},...)", E_USER_WARNING);
-					} else {
-						trigger_error("Unable to call {$function}({$arguments1},{$arguments2})", E_USER_WARNING);
-					}
-				} else {
-					trigger_error("Unable to call {$function}({$arguments1})", E_USER_WARNING);
-				}
-			} else {
-				trigger_error("Unable to call {$function}()", E_USER_WARNING);
-			}
-		}
-
-		return $retval;
+		return $this->_g['directory'];
 	}
+
+	/**
+	 * getLastErrorNo
+	 *
+	 * @param void
+	 * @return integer
+	 */
+	public function getLastErrorNo()
+	{
+		return $this->_err_no;
+	}
+
+	/**
+	 * getLastErrorMsg
+	 *
+	 * @param void
+	 * @return string
+	 */
+	public function getLastErrorMsg()
+	{
+		return $this->_err_msg;
+	}
+
+	/**
+	 * clearLastError
+	 *
+	 * @param void
+	 * @return Yaf_Application
+	 */
+	public function clearLastError()
+	{
+		$this->_err_no = 0;
+		$this->_err_msg = '';
+
+		return $this;
+	}
+
+	/**
+	 * __destruct
+	 *
+	 * @param void
+	 */
+	public function __destruct()
+	{
+		
+	}
+
+	/**
+	 * __clone
+	 *
+	 * @param void
+	 */
+	public function __clone()
+	{
+		
+	}
+
+	/**
+	 * __sleep
+	 *
+	 * @param void
+	 */
+	public function __sleep()
+	{
+		
+	}
+
+	/**
+	 * __wakeup
+	 *
+	 * @param void
+	 */
+	public function __wakeup()
+	{
+		
+	}
+
 
 	/**
 	 * yaf_application_parse_option
 	 *
+	 * @param mixed $config
+	 * @return boolean
 	 */
 	private function _parse_option($config = null)
 	{

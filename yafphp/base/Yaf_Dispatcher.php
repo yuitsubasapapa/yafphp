@@ -24,37 +24,48 @@ final class Yaf_Dispatcher
 	protected $_default_controller;
 	protected $_default_action;
 
-	private $_g = array();
+	private $_g = array(
+		'directory' => '',
+		'ext' => 'php',
+		'global_library' => YAF_LIBRARY,
+		'local_library' => null,
+		'local_namespaces' => '',
+		'view_ext' => 'phtml',
+		'default_module' => 'index',
+		'default_controller' => 'index',
+		'default_action' => 'index',
+		'default_route' => array(),
+		'throw_exception' => true,
+		'catch_exception' => false,
+		'in_exception' => false,
+	);
 	
 	/**
 	 * __construct
 	 *
 	 */
-	public function __construct($yaf_g = null)
+	public function __construct(&$yaf_g = null)
 	{
-		if (self::$_instance instanceof self) {
-			return self::$_instance;
-		}
-
-		$this->_g = $yaf_g;
 		$this->_router = new Yaf_Router();
+		if (is_array($yaf_g)) $this->_g = &$yaf_g;
 		$this->_default_module = $this->_g['default_module'];
 		$this->_default_controller = $this->_g['default_controller'];
 		$this->_default_action = $this->_g['default_action'];
 
-		return self::$_instance = $this;
+		self::$_instance = $this;
 	}
 
 	/**
 	 * getInstance
 	 *
 	 */
-	public static function getInstance()
+	public static function getInstance(&$yaf_g = null)
 	{
-		if(self::$_instance instanceof self)
+		if (self::$_instance instanceof self) {
 			return self::$_instance;
-		else
-			return self::$_instance = new self();
+		}
+
+		return self::$_instance = new self($yaf_g);
 	}
 	
 	/**
@@ -227,7 +238,12 @@ final class Yaf_Dispatcher
 	 */
 	public function throwException($switch = false)
 	{
-		return $this;
+		if (func_num_args()) {
+			$this->_g['throw_exception'] = (boolean) $switch;
+			return $this;
+		} else {
+			return $this->_g['throw_exception'];
+		}
 	}
 
 	/**
@@ -236,7 +252,12 @@ final class Yaf_Dispatcher
 	 */
 	public function catchException($switch = false)
 	{
-		return $this;
+		if (func_num_args()) {
+			$this->_g['catch_exception'] = (boolean) $switch;
+			return $this;
+		} else {
+			return $this->_g['catch_exception'];
+		}
 	}
 
 	/**
@@ -414,16 +435,16 @@ final class Yaf_Dispatcher
 		}
 		$request->setControllerName('Error');
 		$request->setActionName('error');
-		$request->setException($exception);
+		//$request->setException($exception);
 		$request->setParam('exception', $exception);
 		$request->setDispatched(false);
 		unset($exception);
 
 		$view = $this->initView();
 		try {
-			$h = $this->_handle($request, $response, $view);
+			$this->_handle($request, $response, $view);
 		} catch (Exception $e) {
-			if (!$h && $e && ($e instanceof Yaf_Exception_LoadFailed_Controller)) {
+			if ($e && ($e instanceof Yaf_Exception_LoadFailed_Controller)) {
 				/* failover to default module error catcher */
 				$request->setModuleName($this->_default_module);
 				$this->_handle($request, $response, $view);
@@ -499,7 +520,7 @@ final class Yaf_Dispatcher
 	 */
 	private function _handle($request, $response, $view)
 	{
-		throw new Yaf_Exception_LoadFailed_Controller('Controller load failed');
+		//throw new Yaf_Exception_LoadFailed_Controller('Controller load failed');
 /*
 		zend_class_entry *request_ce;
 		char *app_dir = YAF_G(directory);

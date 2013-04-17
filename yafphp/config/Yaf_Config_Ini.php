@@ -14,6 +14,8 @@ final class Yaf_Config_Ini extends Yaf_Config_Abstract
 	/**
 	 * __construct
 	 *
+	 * @param mixed $config
+	 * @param string $section
 	 */
 	public function __construct($config, $section = null)
 	{
@@ -42,8 +44,21 @@ final class Yaf_Config_Ini extends Yaf_Config_Abstract
 	}
 	
 	/**
+	 * __isset
+	 *
+	 * @param string $name
+	 * @return boolean
+	 */
+	public function __isset($name)
+	{
+		return isset($this->_config[$name]);
+	}
+
+	/**
 	 * get
 	 *
+	 * @param string $name
+	 * @return mixed
 	 */
 	public function get($name = null)
 	{
@@ -65,27 +80,44 @@ final class Yaf_Config_Ini extends Yaf_Config_Abstract
 	}
 
 	/**
-	 * __set
+	 * set
 	 *
+	 * @param string $name
+	 * @param mixed $value
+	 * @return boolean
 	 */
 	public function set($name, $value)
 	{
-		return;
+		return false;
 	}
 
 	/**
-	 * ArrayAccess:: offsetUnset
+	 * Countable::count
 	 *
+	 * @param void
+	 * @return integer
 	 */
-	public function offsetUnset($name)
+	public function count()
 	{
-		return;
+		return count($this->_config);
 	}
 
+	/**
+	 * Iterator::rewind
+	 *
+	 * @param void
+	 * @return void
+	 */
+	public function rewind()
+	{
+		reset($this->_config);
+	}
 
 	/**
 	 * Iterator::current
 	 *
+	 * @param void
+	 * @return mixed
 	 */
 	public function current()
 	{
@@ -98,8 +130,54 @@ final class Yaf_Config_Ini extends Yaf_Config_Abstract
 	}
 
 	/**
+	 * Iterator::next
+	 *
+	 * @param void
+	 * @return void
+	 */
+	public function next()
+	{
+		next($this->_config);
+	}
+
+	/**
+	 * Iterator::valid
+	 *
+	 * @param void
+	 * @return boolean
+	 */
+	public function valid()
+	{
+		return (current($this->_config) !== false);
+	}
+
+	/**
+	 * Iterator::key
+	 *
+	 * @param void
+	 * @return string
+	 */
+	public function key()
+	{
+ 		return key($this->_config);
+	}
+
+	/**
+	 * toArray
+	 *
+	 * @param void
+	 * @return array
+	 */
+	public function toArray()
+	{
+		return $this->_config;
+	}
+
+	/**
 	 * readOnly
 	 *
+	 * @param void
+	 * @return boolean
 	 */
 	public function readOnly()
 	{
@@ -107,8 +185,79 @@ final class Yaf_Config_Ini extends Yaf_Config_Abstract
 	}
 
 	/**
+	 * ArrayAccess:: offsetUnset
+	 *
+	 * @param string $name
+	 * @return boolean
+	 */
+	public function offsetUnset($name)
+	{
+		return false;
+	}
+
+	/**
+	 * ArrayAccess:: offsetGet
+	 *
+	 * @param string $name
+	 * @return mixed
+	 */
+	public function offsetGet($name)
+	{
+		return $this->get($name);
+	}
+
+	/**
+	 * ArrayAccess::offsetExists
+	 *
+	 * @param string $name
+	 * @return boolean
+	 */
+	public function offsetExists($name)
+	{
+		return $this->__isset($name);
+	}
+	
+	/**
+	 * ArrayAccess:: offsetSet
+	 *
+	 * @param string $name
+	 * @param mixed $value
+	 * @return boolean
+	 */
+	public function offsetSet($name, $value)
+	{
+		return $this->set($name, $value);
+	}
+
+	/**
+	 * __get
+	 *
+	 * @param string $name
+	 * @return mixed
+	 */
+	public function __get($name)
+	{
+		return $this->get($name);
+	}
+
+	/**
+	 * __set
+	 *
+	 * @param string $name
+	 * @param mixed $value
+	 * @return boolean
+	 */
+	public function __set($name, $value)
+	{
+		return $this->set($name, $value);
+	}
+
+	/**
 	 * yaf_config_ini_parser_cb
 	 *
+	 * @param string $filepath
+	 * @param string $section
+	 * @return array | boolean
 	 */
 	private static function _parser_cb($filepath, $section){
 		$config = parse_ini_file($filepath, true);
@@ -149,6 +298,8 @@ final class Yaf_Config_Ini extends Yaf_Config_Abstract
 	/**
 	 * yaf_config_ini_simple_parser_cb
 	 *
+	 * @param array $simple
+	 * @return array
 	 */
 	private static function _simple_parser_cb($simple){
 		if(!is_array($simple)) return;
@@ -170,4 +321,5 @@ final class Yaf_Config_Ini extends Yaf_Config_Abstract
 
 		return $simple;
 	}
+
 }

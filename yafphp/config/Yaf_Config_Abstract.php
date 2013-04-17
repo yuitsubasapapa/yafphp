@@ -11,187 +11,48 @@
 
 abstract class Yaf_Config_Abstract implements Iterator, ArrayAccess, Countable
 {
-	// array _config
 	protected $_config = array();
-	// boolean _readonly
 	protected $_readonly = true;
-
-	/**
-	 * __construct
-	 *
-	 */
-	public function __construct($config, $section = YAF_ENVIRON)
-	{
-		if (is_string($config)) {
-			return new Yaf_Config_Ini($config, $section);
-		}
-
-		if (is_array($config)) {
-			return new Yaf_Config_Simple($config, true);
-		}
-
-		throw new Yaf_Exception_TypeError('Expects a string or an array as parameter');
-		return false;
-	}
-
-
-
-	/**
-	 * __get
-	 *
-	 */
-	public function __get($name)
-	{
-		return $this->get($name);
-	}
-
-	/**
-	 * __set
-	 *
-	 */
-	public function __set($name, $value)
-	{
-		return $this->set($name, $value);
-	}
-
-	/**
-	 * __isset
-	 *
-	 */
-	public function __isset($name)
-	{
-		return isset($this->_config[$name]);
-	}
 
 	/**
 	 * get
 	 *
+	 * @param string $name
 	 */
 	public function get($name = null)
 	{
-		if (is_null($name)) return $this;
-		if (isset($this->_config[$name])) return $this->_config[$name];
+
 	}
 
 	/**
 	 * set
 	 *
+	 * @param string $name
+	 * @param mixed $value
 	 */
 	public function set($name, $value)
 	{
-		if ($this->_readonly) return;
-		if (is_string($name)) $this->_config[$name] = $value;
-		trigger_error('Expect a string key name', E_USER_WARNING);
-	}
 
-	/**
-	 * Countable::count
-	 *
-	 */
-	public function count()
-	{
-		return count($this->_config);
-	}
-
-	/**
-	 * ArrayAccess::offsetExists
-	 *
-	 */
-	public function offsetExists($name)
-	{
-		return $this->__isset($name);
-	}
-
-	/**
-	 * ArrayAccess:: offsetGet
-	 *
-	 */
-	public function offsetGet($name)
-	{
-		return $this->get($name);
-	}
-
-	/**
-	 * ArrayAccess:: offsetSet
-	 *
-	 */
-	public function offsetSet($name, $value)
-	{
-		return $this->set($name, $value);
-	}
-
-	/**
-	 * ArrayAccess:: offsetUnset
-	 *
-	 */
-	public function offsetUnset($name)
-	{
-		if ($this->_readonly) return;
-		if (is_string($name)) unset($this->_config[$name]);
-		trigger_error('Expect a string key name', E_USER_WARNING);
-	}
-
-	/**
-	 * Iterator::current
-	 *
-	 */
-	public function current()
-	{
-		return current($this->_config);
-	}
-
-	/**
-	 * Iterator::key
-	 *
-	 */
-	public function key()
-	{
- 		return key($this->_config);
-	}
-
-	/**
-	 * Iterator::next
-	 *
-	 */
-	public function next()
-	{
-		next($this->_config);
-	}
-
-	/**
-	 * Iterator::rewind
-	 *
-	 */
-	public function rewind()
-	{
-		reset($this->_config);
-	}
-
-	/**
-	 * Iterator::valid
-	 *
-	 */
-	public function valid()
-	{
-		return (current($this->_config) !== false);
 	}
 
 	/**
 	 * toArray
 	 *
+	 * @param void
 	 */
 	public function toArray()
 	{
-		return $this->_config;
+
 	}
 
 	/**
 	 * readOnly
 	 *
+	 * @param void
 	 */
 	public function readOnly()
 	{
-		return $this->_readonly;
+
 	}
 
 }

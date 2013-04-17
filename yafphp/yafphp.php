@@ -35,10 +35,14 @@ defined('YAF_CACHE_CONFIG') or define('YAF_CACHE_CONFIG', false);
 defined('YAF_USE_NAMESPACE') or define('YAF_USE_NAMESPACE', false);
 defined('YAF_USE_SPL_AUTOLOAD') or define('YAF_USE_SPL_AUTOLOAD', true);
 
-// yafphp debug
+// debug
 defined('YAF_DEBUG') or define('YAF_DEBUG', false);
 
-// yafphp autoload
+/**
+ * __autoload
+ * 
+ * @param string $classname
+ */
 function __autoload($classname)
 {
 	$classfile = $classname;
