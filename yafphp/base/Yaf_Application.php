@@ -44,9 +44,7 @@ final class Yaf_Application
 	 */
 	public function __destruct()
 	{
-		// debug
-		Yaf_Debug::log('yaf_application', 'Yaf_Application()');
-		Yaf_Debug::log(true);
+
 	}
 
 	/**
@@ -57,11 +55,6 @@ final class Yaf_Application
 	 */
 	public function __construct($config, $section = null)
 	{
-		// debug
-		Yaf_Debug::log(null, 'Yaf_Application::__construct()');
-		Yaf_Debug::log('yaf_application');
-		Yaf_Debug::log('yaf_application_init');
-
 		if (empty($config)) return false;
 
 		if (!is_null(self::$_app)) {
@@ -133,9 +126,6 @@ final class Yaf_Application
 		unset($this->_g['modules']);
 
 		self::$_app = $this;
-
-		// debug
-		Yaf_Debug::log('yaf_application_init', 'Yaf_Application::__construct()');
 	}
 
 	/**
@@ -144,9 +134,6 @@ final class Yaf_Application
 	 */
 	public function bootstrap()
 	{
-		// debug
-		Yaf_Debug::log('yaf_application_boot');
-
 		$retval = true;
 		if (!class_exists('Bootstrap')) {
 			if (isset($this->_g['bootstrap'])) {
@@ -179,9 +166,6 @@ final class Yaf_Application
 		}
 		unset($bootstrap);
 
-		// debug
-		Yaf_Debug::log('yaf_application_boot', 'Yaf_Application::bootstrap()');
-
 		return $this;
 	}
 
@@ -191,9 +175,6 @@ final class Yaf_Application
 	 */
 	public function run()
 	{
-		// debug
-		Yaf_Debug::log('yaf_application_run');
-
 		if (is_bool($this->_run) && $this->_run) {
 			throw new Yaf_Exception_StartupError('An application instance already run');
 			return true;
@@ -201,12 +182,11 @@ final class Yaf_Application
 
 		$this->_run = true;
 
-		$response = $this->_dispatcher->dispatch($this->_dispatcher->getRequest());
+		if ($response = $this->_dispatcher->dispatch($this->_dispatcher->getRequest())) {
+			return $response;
+		}
 
-		// debug
-		Yaf_Debug::log('yaf_application_run', 'Yaf_Application::run()');
-
-		return empty($response) ? false : $response;
+		return false;
 	}
 
 	/**
@@ -260,9 +240,6 @@ final class Yaf_Application
 	 */
 	public function execute($function, $parameter = null)
 	{
-		// debug
-		Yaf_Debug::log('yaf_application_exec');
-
 		if (!is_string($function) && !is_array($function)) {
 			$function = (string) $function;
 		}
@@ -293,10 +270,6 @@ final class Yaf_Application
 				trigger_error("Unable to call {$function}()", E_USER_WARNING);
 			}
 		}
-
-		// debug
-		$function = is_array($function) ? implode('::', $function) : (string) $function;
-		Yaf_Debug::log('yaf_application_exec', 'Yaf_Application::execute(' . $function . ')');
 
 		return $retval;
 	}

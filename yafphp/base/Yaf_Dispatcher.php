@@ -32,10 +32,6 @@ final class Yaf_Dispatcher
 	 */
 	public function __construct($yaf_g = null)
 	{
-		// debug
-		Yaf_Debug::log('yaf_dispatcher_init');
-		
-
 		if (self::$_instance instanceof self) {
 			return self::$_instance;
 		}
@@ -45,9 +41,6 @@ final class Yaf_Dispatcher
 		$this->_default_module = $this->_g['default_module'];
 		$this->_default_controller = $this->_g['default_controller'];
 		$this->_default_action = $this->_g['default_action'];
-
-		// debug
-		Yaf_Debug::log('yaf_dispatcher_init', 'Yaf_Dispatcher::__construct()');
 
 		return self::$_instance = $this;
 	}
