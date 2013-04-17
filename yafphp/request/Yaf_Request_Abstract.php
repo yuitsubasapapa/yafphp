@@ -115,7 +115,14 @@ abstract class Yaf_Request_Abstract
 	 */
 	public function setException($exception)
 	{
-		$this->_exception = $exception;
+		if (is_object($this->_exception)
+				&& ($this->_exception instanceof Exception)) {
+
+			$this->_exception = $exception;
+			return $this;
+		}
+
+		return false;
 	}
 
 	/**
