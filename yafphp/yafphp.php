@@ -41,9 +41,6 @@ defined('YAF_DEBUG') or define('YAF_DEBUG', false);
 // yafphp autoload
 function __autoload($classname)
 {
-	// debug
-	//Yaf_Debug::log('__autoload');
-
 	$classfile = $classname;
 	if (strtok($classfile, '_') == 'Yaf')  // yafphp core class
 	{
@@ -55,8 +52,6 @@ function __autoload($classname)
 			if (is_file($classpath)) include($classpath);
 		}
 	}
-	// debug
-	//Yaf_Debug::log('__autoload', "__autoload($classname)");
 
 	return class_exists($classname, false) || interface_exists($classname, false);
 }
