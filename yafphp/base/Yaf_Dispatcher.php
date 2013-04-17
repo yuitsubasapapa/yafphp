@@ -435,7 +435,7 @@ final class Yaf_Dispatcher
 		}
 		$request->setControllerName('Error');
 		$request->setActionName('error');
-		//$request->setException($exception);
+		$request->setException($exception);
 		$request->setParam('exception', $exception);
 		$request->setDispatched(false);
 		unset($exception);

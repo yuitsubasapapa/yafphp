@@ -78,6 +78,7 @@ final class Yaf_Application
 			return false;
 		}
 
+		// yaf_request_instance
 		$request = new Yaf_Request_Http(null, $this->_g['base_uri']);
 		unset($this->_g['base_uri']);
 
@@ -86,6 +87,7 @@ final class Yaf_Application
 			return false;
 		}
 
+		// yaf_dispatcher_instance
 		$this->_dispatcher = Yaf_Dispatcher::getInstance($this->_g);
 		if (is_null($this->_dispatcher)
 				|| !is_object($this->_dispatcher)
@@ -96,6 +98,7 @@ final class Yaf_Application
 		}
 		$this->_dispatcher->setRequest($request);
 
+		// yaf_loader_instance
 		if ($this->_g['local_library']) {
 			$loader = Yaf_Loader::getInstance($this->_g['local_library'], $this->_g['global_library']);
 		} else {

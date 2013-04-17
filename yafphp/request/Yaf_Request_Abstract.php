@@ -23,7 +23,7 @@ abstract class Yaf_Request_Abstract
 	protected $_routed = false;
 
 	private $_exception;
-	
+
 	/**
 	 * getModuleName
 	 *
@@ -109,6 +109,15 @@ abstract class Yaf_Request_Abstract
 		return null;
 	}
 	
+	/**
+	 * setException
+	 *
+	 */
+	public function setException($exception)
+	{
+		$this->_exception = $exception;
+	}
+
 	/**
 	 * getParams
 	 *
