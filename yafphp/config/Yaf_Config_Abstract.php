@@ -19,10 +19,7 @@ abstract class Yaf_Config_Abstract implements Iterator, ArrayAccess, Countable
 	 *
 	 * @param string $name
 	 */
-	public function get($name = null)
-	{
-
-	}
+	abstract public function get($name = null);
 
 	/**
 	 * set
@@ -30,29 +27,20 @@ abstract class Yaf_Config_Abstract implements Iterator, ArrayAccess, Countable
 	 * @param string $name
 	 * @param mixed $value
 	 */
-	public function set($name, $value)
-	{
-
-	}
+	abstract public function set($name, $value);
 
 	/**
 	 * toArray
 	 *
 	 * @param void
 	 */
-	public function toArray()
-	{
-
-	}
+	abstract public function toArray();
 
 	/**
 	 * readOnly
 	 *
 	 * @param void
 	 */
-	public function readOnly()
-	{
-
-	}
+	abstract public function readOnly();
 
 }

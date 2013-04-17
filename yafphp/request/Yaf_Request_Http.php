@@ -62,7 +62,7 @@ final class Yaf_Request_Http extends Yaf_Request_Abstract
 	 */
 	public function getServer($name = null)
 	{
-
+		
 	}
 
 	/**

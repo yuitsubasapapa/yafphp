@@ -25,6 +25,96 @@ abstract class Yaf_Request_Abstract
 	private $_exception;
 
 	/**
+	 * isGet
+	 *
+	 * @param void
+	 * @return boolean
+	 */
+	public function isGet()
+	{
+		return (strtoupper($this->_method) == 'GET');
+	}
+	
+	/**
+	 * isPost
+	 *
+	 * @param void
+	 * @return boolean
+	 */
+	public function isPost()
+	{
+		return (strtoupper($this->_method) == 'POST');
+	}
+	
+	/**
+	 * isPut
+	 *
+	 * @param void
+	 * @return boolean
+	 */
+	public function isPut()
+	{
+		return (strtoupper($this->_method) == 'PUT');
+	}
+	
+	/**
+	 * isHead
+	 *
+	 * @param void
+	 * @return boolean
+	 */
+	public function isHead()
+	{
+		return (strtoupper($this->_method) == 'HEAD');
+	}
+	
+	/**
+	 * isOptions
+	 *
+	 * @param void
+	 * @return boolean
+	 */
+	public function isOptions()
+	{
+		return (strtoupper($this->_method) == 'OPTIONS');
+	}
+	
+	/**
+	 * isCli
+	 *
+	 * @param void
+	 * @return boolean
+	 */
+	public function isCli()
+	{
+		(strtoupper($this->_method) == 'CLI');
+	}
+
+	/**
+	 * isXmlHttpRequest
+	 *
+	 * @param void
+	 * @return boolean
+	 */
+	public function isXmlHttpRequest()
+	{
+		return false;
+	}
+
+	/**
+	 * getServer
+	 *
+	 * @param string $name
+	 * @param mixed $default
+	 * @return mixed
+	 */
+	public function getServer($name, $default = null)
+	{
+
+	}
+	
+
+	/**
 	 * getModuleName
 	 *
 	 */
@@ -252,12 +342,7 @@ abstract class Yaf_Request_Abstract
 	 */
 	abstract public function getEnv($name = null);
 	
-	/**
-	 * getServer
-	 *
-	 */
-	abstract public function getServer($name = null);
-	
+
 	/**
 	 * getCookie
 	 *
@@ -269,53 +354,5 @@ abstract class Yaf_Request_Abstract
 	 *
 	 */
 	abstract public function getFiles($name = null);
-	
-	/**
-	 * isGet
-	 *
-	 */
-	abstract public function isGet();
-	
-	/**
-	 * isPost
-	 *
-	 */
-	abstract public function isPost();
-	
-	/**
-	 * isHead
-	 *
-	 */
-	abstract public function isHead();
-	
-	/**
-	 * isXmlHttpRequest
-	 *
-	 */
-	abstract public function isXmlHttpRequest();
-	
-	/**
-	 * isPut
-	 *
-	 */
-	abstract public function isPut();
-	
-	/**
-	 * isDelete
-	 *
-	 */
-	abstract public function isDelete();
-	
-	/**
-	 * isOptions
-	 *
-	 */
-	abstract public function isOptions();
-	
-	/**
-	 * isCli
-	 *
-	 */
-	abstract public function isCli();
 
 }
