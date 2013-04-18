@@ -87,7 +87,7 @@ if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
 			$this->uri = $request_uri;
 
 			// yaf_request_set_base_uri
-			$this->setBaseUri($base_uri, $request_uri);
+			$this->_set_base_uri($base_uri, $request_uri);
 		}
 
 		$this->params = array();

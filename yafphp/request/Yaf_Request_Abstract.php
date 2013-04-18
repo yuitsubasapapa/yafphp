@@ -323,75 +323,17 @@ abstract class Yaf_Request_Abstract
 	 * setBaseUri
 	 *
 	 * @param string $base_uri
-	 * @param string $request_uri
 	 * @return boolean | Yaf_Request_Abstract
 	 */
-	public function setBaseUri($base_uri, $request_uri = '')
+	public function setBaseUri($base_uri)
 	{
 		if ($base_uri && is_string($base_uri)) {
 			$this->_base_uri = $base_uri;
 			return $this;
-		} else {
-			$script_filename = $this->getServer('SCRIPT_FILENAME');
-
-			do {
-				if ($script_filename && is_string($script_filename)) {
-					$file_name = basename($script_filename, YAF_G('ext'));
-					$file_name_len = strlen($file_name);
-
-					$script_name = $this->getServer('SCRIPT_NAME');
-					if ($script_name && is_string($script_name)) {
-						$script = basename($script_name);
-
-						if (strncmp($file_name, $script, $file_name_len) == 0) {
-							$basename = $script_name;
-							break;
-						}
-					}
-
-					$phpself_name = $this->getServer('PHP_SELF');
-					if ($phpself_name && is_string($phpself_name)) {
-						$phpself = basename($phpself_name);
-						if (strncmp($file_name, $phpself, $file_name_len) == 0) {
-							$basename = $phpself_name;
-							break;
-						}
-					}
-
-					$orig_name = $this->getServer('ORIG_SCRIPT_NAME');
-					if ($orig_name && is_string($orig_name)) {
-						$orig = basename($orig_name);
-						if (strncmp($file_name, $orig, $file_name_len) == 0) {
-							$basename 	 = $orig_name;
-							break;
-						}
-					}
-				}
-			} while (0);
-
-			if ($basename && strstr($request_uri, $basename) == $request_uri) {
-				$this->_base_uri = rtrim($basename, '/');
-
-				return $this;
-			} elseif ($basename) {
-				$dirname = rtrim(dirname($basename), '/');
-				if ($dirname) {
-					if (strstr($request_uri, $dirname) == $request_uri) {
-						$this->_base_uri = $dirname;
-
-						return $this;
-					}
-				}
-			}
-
-			$this->_base_uri = '';
-
-			return $this;
 		}
-
 		return false;
 	}
-	
+
 	/**
 	 * getBaseUri
 	 *
@@ -478,6 +420,80 @@ abstract class Yaf_Request_Abstract
 			$this->routed = $flag;
 			return $this;
 		}
+		return false;
+	}
+
+	/**
+	 * yaf_request_set_base_uri
+	 *
+	 * @param string $base_uri
+	 * @param string $request_uri
+	 * @return boolean
+	 */
+	protected function _set_base_uri($base_uri, $request_uri = null)
+	{
+		if ($base_uri && is_string($base_uri)) {
+			$this->_base_uri = $base_uri;
+
+			return true;
+		} elseif($request_uri && is_string($request_uri)) {
+			$script_filename = $this->getServer('SCRIPT_FILENAME');
+
+			do {
+				if ($script_filename && is_string($script_filename)) {
+					$file_name = basename($script_filename, YAF_G('ext'));
+					$file_name_len = strlen($file_name);
+
+					$script_name = $this->getServer('SCRIPT_NAME');
+					if ($script_name && is_string($script_name)) {
+						$script = basename($script_name);
+
+						if (strncmp($file_name, $script, $file_name_len) == 0) {
+							$basename = $script_name;
+							break;
+						}
+					}
+
+					$phpself_name = $this->getServer('PHP_SELF');
+					if ($phpself_name && is_string($phpself_name)) {
+						$phpself = basename($phpself_name);
+						if (strncmp($file_name, $phpself, $file_name_len) == 0) {
+							$basename = $phpself_name;
+							break;
+						}
+					}
+
+					$orig_name = $this->getServer('ORIG_SCRIPT_NAME');
+					if ($orig_name && is_string($orig_name)) {
+						$orig = basename($orig_name);
+						if (strncmp($file_name, $orig, $file_name_len) == 0) {
+							$basename 	 = $orig_name;
+							break;
+						}
+					}
+				}
+			} while (0);
+
+			if ($basename && strstr($request_uri, $basename) == $request_uri) {
+				$this->_base_uri = rtrim($basename, '/');
+
+				return true;
+			} elseif ($basename) {
+				$dirname = rtrim(dirname($basename), '/');
+				if ($dirname) {
+					if (strstr($request_uri, $dirname) == $request_uri) {
+						$this->_base_uri = $dirname;
+
+						return true;
+					}
+				}
+			}
+
+			$this->_base_uri = '';
+
+			return true;
+		}
+
 		return false;
 	}
 
