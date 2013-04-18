@@ -210,7 +210,7 @@ final class Yaf_Request_Simple extends Yaf_Request_Abstract
 	public function isXmlHttpRequest()
 	{
 		$header = isset($_SERVER['HTTP_X_REQUESTED_WITH']) ? $_SERVER['X-Requested-With'] : '';
-		if (is_string($header) && strncasecmp('XMLHttpRequest', $header, strlen($header)) == 0) {
+		if (is_string($header) && strncasecmp('XMLHttpRequest', $header, 14) == 0) {
 			return true;
 		}
 		return false;

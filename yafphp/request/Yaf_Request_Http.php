@@ -211,7 +211,7 @@ if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
 	public function isXmlHttpRequest()
 	{
 		$header = isset($_SERVER['HTTP_X_REQUESTED_WITH']) ? $_SERVER['HTTP_X_REQUESTED_WITH'] : '';
-		if (is_string($header) && strncasecmp('XMLHttpRequest', $header, strlen($header)) == 0) {
+		if (is_string($header) && strncasecmp('XMLHttpRequest', $header, 14) == 0) {
 			return true;
 		}
 		return false;

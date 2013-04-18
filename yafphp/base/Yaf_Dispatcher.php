@@ -17,9 +17,11 @@ final class Yaf_Dispatcher
 	protected $_view;
 	protected $_request;
 	protected $_plugins = array();
-	protected $_render;
+
+	protected $_render = true;
 	protected $_return_response = false;
 	protected $_instantly_flush = false;
+
 	protected $_default_module;
 	protected $_default_controller;
 	protected $_default_action;
@@ -27,8 +29,9 @@ final class Yaf_Dispatcher
 	/**
 	 * __construct
 	 *
+	 * @param void
 	 */
-	public function __construct()
+	private function __construct()
 	{
 		$this->_router = new Yaf_Router();
 		$this->_default_module = YAF_G('default_module');
@@ -39,8 +42,258 @@ final class Yaf_Dispatcher
 	}
 
 	/**
+	 * __clone
+	 *
+	 * @param void
+	 */
+	private function __clone()
+	{
+		
+	}
+
+	/**
+	 * __sleep
+	 *
+	 * @param void
+	 */
+	private function __sleep()
+	{
+		
+	}
+
+	/**
+	 * __wakeup
+	 *
+	 * @param void
+	 */
+	private function __wakeup()
+	{
+		
+	}
+
+	
+	/**
+	 * enableView
+	 *
+	 * @param void
+	 * @return Yaf_Dispatcher
+	 */
+	public function enableView()
+	{
+		$this->_render = true;
+		return $this;
+	}
+	
+	/**
+	 * disableView
+	 *
+	 * @param void
+	 * @return Yaf_Dispatcher
+	 */
+	public function disableView()
+	{
+		$this->_render = false;
+		return $this;
+
+	}
+
+	/**
+	 * initView
+	 *
+	 * @return boolean | Yaf_View_Interface
+	 */
+	public function initView()
+	{
+		if ($this->_view && is_object($this->_view)
+				&& ($this->_view instanceof Yaf_View_Interface)) {
+			return $this->_view;
+		}
+		return false;
+	}
+
+	/**
+	 * setView
+	 *
+	 * @param Yaf_View_Interface $view
+	 * @return boolean | Yaf_Dispatcher
+	 */
+	public function setView($view)
+	{
+		if ($view && is_object($view)
+				&& ($view instanceof Yaf_View_Interface)) {
+			$this->_view = $view;
+			return $this;
+		}
+		return false;
+	}
+
+	/**
+	 * setRequest
+	 *
+	 * @param Yaf_Request_Abstract $request
+	 * @return boolean | Yaf_Dispatcher
+	 */
+	public function setRequest($request)
+	{
+		if (is_object($request)
+				&& ($request instanceof Yaf_Request_Abstract)) {
+			$this->_request = $request;
+			return $this;
+		}
+		trigger_error('Expects a Yaf_Request_Abstract instance', E_USER_WARNING);
+		return false;
+	}
+
+	/**
+	 * getApplication
+	 *
+	 * @param void
+	 * @return Yaf_Application
+	 */
+	public function getApplication()
+	{
+		return Yaf_Application::app();
+	}
+
+	/**
+	 * getRouter
+	 *
+	 * @param void
+	 * @return Yaf_Router
+	 */
+	public function getRouter()
+	{
+		return $this->_router;
+	}
+
+	/**
+	 * getRequest
+	 *
+	 * @param void
+	 * @return Yaf_Request_Abstract
+	 */
+	public function getRequest()
+	{
+		return $this->_request;
+	}
+
+	/**
+	 * setErrorHandler
+	 *
+	 * @param string $callback
+	 * @param int $error_type
+	 * @return boolean | Yaf_Dispatcher
+	 */
+	public function setErrorHandler($callback, $error_type = null)
+	{
+		if (is_null($error_type))
+			$error_type = E_ALL | E_STRICT;
+
+		if (set_error_handler($callback, $error_type)) {
+			return $this;
+		}
+		return false;
+	}
+
+	/**
+	 * setDefaultModule
+	 *
+	 * @param string $module_name
+	 * @return boolean | Yaf_Dispatcher
+	 */
+	public function setDefaultModule($module_name)
+	{
+		if ($module_name && is_string($module_name)
+				&& $this->_is_module_name($module_name)) {
+			$this->_default_module = ucfirst(strtolower($module_name));
+			return $this;
+		}
+		return false;
+	}
+
+	/**
+	 * setDefaultController
+	 *
+	 * @param string $controller_name
+	 * @return boolean | Yaf_Dispatcher
+	 */
+	public function setDefaultController($controller_name)
+	{
+		if ($controller_name && is_string($controller_name)) {
+			$this->_default_controller = ucfirst(strtolower($controller_name));
+			return $this;
+		}
+		return false;
+	}
+
+	/**
+	 * setDefaultAction
+	 *
+	 * @param string $action_name
+	 * @return boolean | Yaf_Dispatcher
+	 */
+	public function setDefaultAction($action_name)
+	{
+		if ($action_name && is_string($action_name)) {
+			$this->_default_action = strtolower($action_name);
+			return $this;
+		}
+		return false;
+	}
+
+	/**
+	 * returnResponse
+	 *
+	 * @param void | boolean $flag
+	 * @return boolean | Yaf_Dispatcher
+	 */
+	public function returnResponse($flag = false)
+	{
+		if (func_num_args()) {
+			$this->_return_response = (boolean)$flag;
+			return $this;
+		} else {
+			return (boolean)$this->_return_response;
+		}
+	}
+
+	/**
+	 * autoRender
+	 *
+	 * @param void | boolean $flag
+	 * @return boolean | Yaf_Dispatcher
+	 */
+	public function autoRender($flag = false)
+	{
+		if (func_num_args()) {
+			$this->_render = (boolean)$flag;
+			return $this;
+		} else {
+			return (boolean)$this->_render;
+		}
+	}
+
+	/**
+	 * flushInstantly
+	 *
+	 * @param void | boolean $flag
+	 * @return boolean | Yaf_Dispatcher
+	 */
+	public function flushInstantly($flag = false)
+	{
+		if (func_num_args()) {
+			$this->_instantly_flush = (boolean)$flag;
+			return $this;
+		} else {
+			return (boolean)$this->_instantly_flush;
+		}
+	}
+
+	/**
 	 * getInstance
 	 *
+	 * @param void
+	 * @return Yaf_Dispatcher
 	 */
 	public static function getInstance()
 	{
@@ -50,202 +303,12 @@ final class Yaf_Dispatcher
 
 		return self::$_instance = new self();
 	}
-	
-	/**
-	 * disableView
-	 *
-	 */
-	public function disableView()
-	{
-
-	}
-
-	/**
-	 * enableView
-	 *
-	 */
-	public function enableView()
-	{
-		return $this;
-	}
-
-	/**
-	 * autoRender
-	 *
-	 */
-	public function autoRender($flag)
-	{
-		return $this;
-	}
-
-	/**
-	 * returnResponse
-	 *
-	 */
-	public function returnResponse($flag)
-	{
-		return $this;
-	}
-
-	/**
-	 * flushInstantly
-	 *
-	 */
-	public function flushInstantly($flag)
-	{
-		return $this;
-	}
-
-	/**
-	 * setErrorHandler
-	 *
-	 */
-	public function setErrorHandler($callback, $error_type = NULL)
-	{
-		if(is_null($error_type)) $error_type = E_ALL | E_STRICT;
-		return $this;
-	}
-
-	/**
-	 * getApplication
-	 *
-	 */
-	public function getApplication()
-	{
-		return $this;
-	}
-
-	/**
-	 * getRequest
-	 *
-	 */
-
-	public function getRequest()
-	{
-		return $this->_request;
-	}
-
-	/**
-	 * getRouter
-	 *
-	 */
-	public function getRouter()
-	{
-		return $this->_router;
-	}
-
-	/**
-	 * registerPlugin
-	 *
-	 */
-	public function registerPlugin($plugin)
-	{
-		return $this;
-	}
-
-	/**
-	 * setAppDirectory
-	 *
-	 */
-	public function setAppDirectory($directory)
-	{
-		return $this;
-	}
-
-	/**
-	 * setRequest
-	 *
-	 */
-	public function setRequest($request)
-	{
-		if (!is_object($request) || !($request instanceof Yaf_Request_Abstract)) {
-			trigger_error('Expects a Yaf_Request_Abstract instance', E_USER_WARNING);
-			return false;
-		}
-		
-		$this->_request = $request;
-	}
-
-	/**
-	 * initView
-	 *
-	 */
-	public function initView()
-	{
-		return $this;
-	}
-
-	/**
-	 * setView
-	 *
-	 */
-	public function setView($view)
-	{
-		$this->_view = $view;
-		return $this;
-	}
-
-	/**
-	 * setDefaultModule
-	 *
-	 */
-	public function setDefaultModule($default_module_name)
-	{
-		$this->_default_module = $default_module_name;
-		return $this;
-	}
-
-	/**
-	 * setDefaultController
-	 *
-	 */
-	public function setDefaultController($default_controller_name)
-	{
-		$this->_default_controller = $default_controller_name;
-		return $this;
-	}
-
-	/**
-	 * setDefaultAction
-	 *
-	 */
-	public function setDefaultAction($default_action_name)
-	{
-		$this->_default_action = $default_action_name;
-		return $this;
-	}
-
-	/**
-	 * throwException
-	 *
-	 */
-	public function throwException($switch = false)
-	{
-		if (func_num_args()) {
-			YAF_G('throw_exception', (boolean)$switch);
-			return $this;
-		} else {
-			return YAF_G('throw_exception');
-		}
-	}
-
-	/**
-	 * catchException
-	 *
-	 */
-	public function catchException($switch = false)
-	{
-		if (func_num_args()) {
-			YAF_G('catch_exception', (boolean)$switch);
-			return $this;
-		} else {
-			return YAF_G('catch_exception');
-		}
-	}
 
 	/**
 	 * dispatch
 	 *
+	 * @param Yaf_Request_Abstract $request
+	 * @return boolean | string
 	 */
 	public function dispatch($request)
 	{
@@ -261,7 +324,7 @@ final class Yaf_Dispatcher
 			if (!$request || !is_object($request)) {
 				throw new Yaf_Exception_TypeError('Expect a Yaf_Request_Abstract instance');
 				unset($response);
-				return null;
+				return false;
 			}
 
 			/* route request */
@@ -283,7 +346,7 @@ final class Yaf_Dispatcher
 				if (!$this->_route($request)) {
 					throw new Yaf_Exception_RouterFailed('Routing request failed');
 					unset($response);
-					return null;
+					return false;
 				}
 
 				$this->_fix_default($request);
@@ -340,7 +403,7 @@ final class Yaf_Dispatcher
 							$this->_exception_handler($request, $response, $e);
 							unset($response);
 						}
-						return null;
+						return false;
 					}
 				}
 
@@ -386,7 +449,7 @@ final class Yaf_Dispatcher
 					}
 				}
 				unset($response);
-				return null;
+				return false;
 			}
 
 			if (!$this->_return_response) {
@@ -401,8 +464,60 @@ final class Yaf_Dispatcher
 	}
 
 	/**
+	 * throwException
+	 *
+	 * @param void | boolean $flag
+	 * @return boolean | Yaf_Dispatcher
+	 */
+	public function throwException($flag = false)
+	{
+		if (func_num_args()) {
+			YAF_G('throw_exception', (boolean)$flag);
+			return $this;
+		} else {
+			return YAF_G('throw_exception');
+		}
+	}
+
+	/**
+	 * catchException
+	 *
+	 * @param void | boolean $flag
+	 * @return boolean | Yaf_Dispatcher
+	 */
+	public function catchException($flag = false)
+	{
+		if (func_num_args()) {
+			YAF_G('catch_exception', (boolean)$flag);
+			return $this;
+		} else {
+			return YAF_G('catch_exception');
+		}
+	}
+
+	/**
+	 * registerPlugin
+	 *
+	 * @param Yaf_Plugin_Abstract $plugin
+	 * @return boolean | Yaf_Dispatcher
+	 */
+	public function registerPlugin($plugin)
+	{
+		if (is_object($plugin)
+				&& ($plugin instanceof Yaf_Plugin_Abstract)) {
+			$this->_plugins[] = $plugin;
+			return $this;
+		} 
+		trigger_error('Expects a Yaf_Plugin_Abstract instance', E_USER_WARNING);
+		return false;
+	}
+
+	/**
 	 * yaf_dispatcher_exception_handler
 	 *
+	 * @param Yaf_Request_Abstract $request
+	 * @param Yaf_Response_Abstract $response
+	 * @param Exception $exception
 	 */
 	private function _exception_handler($request, $response, &$exception)
 	{
@@ -413,7 +528,7 @@ final class Yaf_Dispatcher
 		YAF_G('in_exception', true);
 
 		$module = $request->getModuleName();
-		if (!$module || !is_string($module) || !strlen($module)) {
+		if (!$module || !is_string($module)) {
 			$request->setModuleName($this->_default_module);
 		}
 		$request->setControllerName('Error');
@@ -441,6 +556,7 @@ final class Yaf_Dispatcher
 	/**
 	 * yaf_dispatcher_route
 	 *
+	 * @param Yaf_Request_Abstract $request
 	 */
 	private function _route($request)
 	{
@@ -464,35 +580,36 @@ final class Yaf_Dispatcher
 	/**
 	 * yaf_dispatcher_fix_default
 	 *
+	 * @param Yaf_Request_Abstract $request
 	 */
 	private function _fix_default($request)
 	{
 		// module
 		$module = $request->getModuleName();
-		if (!$module || !is_string($module) || !strlen($module)) {
-			$request->setModuleName($this->_default_module);
-		} else {
+		if ($module && is_string($module)) {
 			$request->setModuleName(strtolower($module));
+		} else {
+			$request->setModuleName($this->_default_module);
 		}
 
 		// controller
 		$controller = $request->getControllerName();
-		if (!$controller || !is_string($controller) || !strlen($controller)) {
-			$request->setModuleName($this->_default_controller);
-		} else {
+		if ($controller && is_string($controller)) {
 			/**
 			 * upper controller name
 			 * eg: Index_sub -> Index_Sub
 			 */
 			$request->setControllerName(ucwords($controller));
+		} else {
+			$request->setModuleName($this->_default_controller);
 		}
 
 		// action
 		$action = $request->getActionName();
-		if (!$action || !is_string($action) || !strlen($action)) {
-			$request->setModuleName($this->_default_action);
-		} else {
+		if ($action && is_string($action)) {
 			$request->seActionName(strtolower($action));
+		} else {
+			$request->setModuleName($this->_default_action);
 		}
 
 	}
@@ -500,62 +617,52 @@ final class Yaf_Dispatcher
 	/**
 	 * yaf_dispatcher_handle
 	 *
+	 * @param Yaf_Request_Abstract $request
+	 * @param Yaf_Response_Abstract $response
+	 * @param Yaf_View_Interface $view
 	 */
 	private function _handle($request, $response, $view)
 	{
-		//throw new Yaf_Exception_LoadFailed_Controller('Controller load failed');
-/*
-		zend_class_entry *request_ce;
-		char *app_dir = YAF_G(directory);
+		$app_dir = YAF_G('directory');
 
-		request_ce = Z_OBJCE_P(request);
+		$request->setDispatched(true);
 
-		yaf_request_set_dispatched(request, 1 TSRMLS_CC);
-		if (!app_dir) {
-			yaf_trigger_error(YAF_ERR_STARTUP_FAILED TSRMLS_CC, "%s requires %s(which set the application.directory) to be initialized first",
-					yaf_dispatcher_ce->name, yaf_application_ce->name);
-			return 0;
+		if (!$app_dir) {
+			throw new Yaf_Exception_StartupError('Yaf_Dispatcher requires Yaf_Application(which set the application.directory) to be initialized first');
+			return false;
 		} else {
-			int	is_def_module = 0;
-			int is_def_ctr = 0;
-			zval *module, *controller, *dmodule, *dcontroller, *instantly_flush;
-			zend_class_entry *ce;
-			yaf_controller_t *executor;
-			zend_function    *fptr;
+			$is_def_module = false;
+			/* $is_def_ctr = false; */
 
-			module		= zend_read_property(request_ce, request, ZEND_STRL(YAF_REQUEST_PROPERTY_NAME_MODULE), 1 TSRMLS_CC);
-			controller	= zend_read_property(request_ce, request, ZEND_STRL(YAF_REQUEST_PROPERTY_NAME_CONTROLLER), 1 TSRMLS_CC);
-
-			dmodule		= zend_read_property(yaf_dispatcher_ce, dispatcher, ZEND_STRL(YAF_DISPATCHER_PROPERTY_NAME_MODULE), 1 TSRMLS_CC);
-			dcontroller = zend_read_property(yaf_dispatcher_ce, dispatcher, ZEND_STRL(YAF_DISPATCHER_PROPERTY_NAME_CONTROLLER), 1 TSRMLS_CC);
-
-			if (Z_TYPE_P(module) != IS_STRING
-					|| !Z_STRLEN_P(module)) {
-				yaf_trigger_error(YAF_ERR_DISPATCH_FAILED TSRMLS_CC, "Unexcepted a empty module name");
-				return 0;
-			} else if (!yaf_application_is_module_name(Z_STRVAL_P(module), Z_STRLEN_P(module) TSRMLS_CC)) {
-				yaf_trigger_error(YAF_ERR_NOTFOUND_MODULE TSRMLS_CC, "There is no module %s", Z_STRVAL_P(module));
-				return 0;
+			// module
+			$module = $request->getModuleName();
+			if (empty($module) || !is_string($module)) {
+				throw new Yaf_Exception_DispatchFailed('Unexcepted a empty module name');
+				return false;
+			} elseif (!$this->_is_module_name($module)) {
+				throw new Yaf_Exception_LoadFailed_Module('There is no module ' . $module);
+				return false;
+			}
+			// controller
+			$controller	= $request->getControllerName();
+			if (empty($controller) || !is_string($controller)) {
+				throw new Yaf_Exception_DispatchFailed('Unexcepted a empty controller name');
+				return false;
 			}
 
-			if (Z_TYPE_P(controller) != IS_STRING
-					|| !Z_STRLEN_P(controller)) {
-				yaf_trigger_error(YAF_ERR_DISPATCH_FAILED TSRMLS_CC, "Unexcepted a empty controller name");
-				return 0;
+			if(strcasecmp($this->_default_module, $module) == 0) {
+				$is_def_module = true;
 			}
 
-			if(strncasecmp(Z_STRVAL_P(dmodule), Z_STRVAL_P(module), Z_STRLEN_P(module)) == 0) {
-				is_def_module = 1;
-			}
+			/* if (strcasecmp($this->_default_controller), $controller) == 0) {
+				$is_def_ctr = true;
+			} */
 
-			if (strncasecmp(Z_STRVAL_P(dcontroller), Z_STRVAL_P(controller), Z_STRLEN_P(controller)) == 0) {
-				is_def_ctr = 1;
-			}
-
-			ce = yaf_dispatcher_get_controller(app_dir, Z_STRVAL_P(module), Z_STRVAL_P(controller), Z_STRLEN_P(controller), is_def_module TSRMLS_CC);
-			if (!ce) {
-				return 0;
+			$ce = $this->_get_controller($app_dir, $module, $controller, $is_def_module);
+			if (!$ce) {
+				return false;
 			} else {
+/*
 				zend_class_entry *view_ce = NULL;
 				zval  *action, *render, *view_dir = NULL, *ret = NULL;
 				char  *action_lower, *func_name;
@@ -791,13 +898,91 @@ final class Yaf_Dispatcher
 					}
 				}
 				zval_ptr_dtor(&action);
+*/				
 			}
-			return 1;
+			return true;
 		}
-		return 0;
-*/
 
 		return false;
 	}
-	
+
+
+	/**
+	 * yaf_dispatcher_get_controller
+	 *
+	 * @param string $app_dir
+	 * @param string $module
+	 * @param string $controller
+	 * @param boolean $def_module
+	 * @return boolean | string
+	 */
+	private function _get_controller($app_dir, $module, $controller, $def_module)
+	{
+		if ($def_module) {
+			$directory = $app_dir . '/controllers';
+		} else {
+			$directory = $app_dir . '/modules/' . $module . '/controllers';
+		}
+
+		if ($directory) {
+			if (YAF_NAME_SUFFIX) {
+				$class = $controller . YAF_NAME_SEPARATOR . 'Controller';
+			} else {
+				$class = 'Controller' . YAF_NAME_SEPARATOR . $controller;
+			}
+
+			if (!class_exists($class)) {
+
+			}
+/*
+			if (zend_hash_find(EG(class_table), class_lowercase, class_len + 1, (void *)&ce) != SUCCESS) {
+
+				if (!yaf_internal_autoload(controller, len, &directory TSRMLS_CC)) {
+					yaf_trigger_error(YAF_ERR_NOTFOUND_CONTROLLER TSRMLS_CC, "Failed opening controller script %s: %s", directory, strerror(errno));
+					efree(class);
+					efree(class_lowercase);
+					efree(directory);
+					return NULL;
+				} else if (zend_hash_find(EG(class_table), class_lowercase, class_len + 1, (void **) &ce) != SUCCESS)  {
+					yaf_trigger_error(YAF_ERR_AUTOLOAD_FAILED TSRMLS_CC, "Could not find class %s in controller script %s", class, directory);
+					efree(class);
+					efree(class_lowercase);
+					efree(directory);
+					return 0;
+				} else if (!instanceof_function(*ce, yaf_controller_ce TSRMLS_CC)) {
+					yaf_trigger_error(YAF_ERR_TYPE_ERROR TSRMLS_CC, "Controller must be an instance of %s", yaf_controller_ce->name);
+					efree(class);
+					efree(class_lowercase);
+					efree(directory);
+					return 0;
+				}
+			}
+*/
+			return $class;
+		}
+
+		return false;
+	}
+
+	/**
+	 * yaf_application_is_module_name
+	 *
+	 * @param string $name
+	 * @return boolean
+	 */
+	private function _is_module_name($name)
+	{
+		if ($name && is_string($name)) {
+			$modules = $this->getApplication()->getModules();
+			if ($modules && is_array($modules)) {
+				foreach ($modules as $value) {
+					if (strcasecmp($name, $value) == 0) {
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+	}
+
 }

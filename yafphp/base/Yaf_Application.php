@@ -247,12 +247,12 @@ final class Yaf_Application
 	}
 
 	/**
-	 * geModules
+	 * getModules
 	 *
 	 * @param void
 	 * @return array
 	 */
-	public function geModules()
+	public function getModules()
 	{
 		return $this->_modules;
 	}
@@ -369,7 +369,6 @@ final class Yaf_Application
 	{
 		
 	}
-
 
 	/**
 	 * yaf_application_parse_option
