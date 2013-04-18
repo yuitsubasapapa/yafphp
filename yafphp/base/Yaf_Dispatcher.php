@@ -24,33 +24,16 @@ final class Yaf_Dispatcher
 	protected $_default_controller;
 	protected $_default_action;
 
-	private $_g = array(
-		'directory' => '',
-		'ext' => 'php',
-		'global_library' => YAF_LIBRARY,
-		'local_library' => null,
-		'local_namespaces' => '',
-		'view_ext' => 'phtml',
-		'default_module' => 'index',
-		'default_controller' => 'index',
-		'default_action' => 'index',
-		'default_route' => array(),
-		'throw_exception' => true,
-		'catch_exception' => false,
-		'in_exception' => false,
-	);
-	
 	/**
 	 * __construct
 	 *
 	 */
-	public function __construct(&$yaf_g = null)
+	public function __construct()
 	{
 		$this->_router = new Yaf_Router();
-		if (is_array($yaf_g)) $this->_g = &$yaf_g;
-		$this->_default_module = $this->_g['default_module'];
-		$this->_default_controller = $this->_g['default_controller'];
-		$this->_default_action = $this->_g['default_action'];
+		$this->_default_module = YAF_G('default_module');
+		$this->_default_controller = YAF_G('default_controller');
+		$this->_default_action = YAF_G('default_action');
 
 		self::$_instance = $this;
 	}
@@ -59,13 +42,13 @@ final class Yaf_Dispatcher
 	 * getInstance
 	 *
 	 */
-	public static function getInstance(&$yaf_g = null)
+	public static function getInstance()
 	{
 		if (self::$_instance instanceof self) {
 			return self::$_instance;
 		}
 
-		return self::$_instance = new self($yaf_g);
+		return self::$_instance = new self();
 	}
 	
 	/**
@@ -239,10 +222,10 @@ final class Yaf_Dispatcher
 	public function throwException($switch = false)
 	{
 		if (func_num_args()) {
-			$this->_g['throw_exception'] = (boolean) $switch;
+			YAF_G('throw_exception', (boolean)$switch);
 			return $this;
 		} else {
-			return $this->_g['throw_exception'];
+			return YAF_G('throw_exception');
 		}
 	}
 
@@ -253,10 +236,10 @@ final class Yaf_Dispatcher
 	public function catchException($switch = false)
 	{
 		if (func_num_args()) {
-			$this->_g['catch_exception'] = (boolean) $switch;
+			YAF_G('catch_exception', (boolean)$switch);
 			return $this;
 		} else {
-			return $this->_g['catch_exception'];
+			return YAF_G('catch_exception');
 		}
 	}
 
@@ -292,7 +275,7 @@ final class Yaf_Dispatcher
 						}
 					}
 				} catch (Exception $e) {
-					if ($this->_g['catch_exception']) {
+					if (YAF_G('catch_exception')) {
 						$this->_exception_handler($request, $response, $e);
 					}
 				}
@@ -314,7 +297,7 @@ final class Yaf_Dispatcher
 						}
 					}
 				} catch (Exception $e) {
-					if ($this->_g['catch_exception']) {
+					if (YAF_G('catch_exception')) {
 						$this->_exception_handler($request, $response, $e);
 						unset($response);
 					}
@@ -334,7 +317,7 @@ final class Yaf_Dispatcher
 					}
 				}
 			} catch (Exception $e) {
-				if ($this->_g['catch_exception']) {
+				if (YAF_G('catch_exception')) {
 					$this->_exception_handler($request, $response, $e);
 					unset($response);
 				}
@@ -353,7 +336,7 @@ final class Yaf_Dispatcher
 					}
 				} catch (Exception $e) {
 					if (!$this->_handle($request, $response, $view)) {
-						if ($this->_g['catch_exception']) {
+						if (YAF_G('catch_exception')) {
 							$this->_exception_handler($request, $response, $e);
 							unset($response);
 						}
@@ -372,7 +355,7 @@ final class Yaf_Dispatcher
 						}
 					}
 				} catch (Exception $e) {
-					if ($this->_g['catch_exception']) {
+					if (YAF_G('catch_exception')) {
 						$this->_exception_handler($request, $response, $e);
 						unset($response);
 					}
@@ -388,7 +371,7 @@ final class Yaf_Dispatcher
 					}
 				}
 			} catch (Exception $e) {
-				if ($this->_g['catch_exception']) {
+				if (YAF_G('catch_exception')) {
 					$this->_exception_handler($request, $response, $e);
 					unset($response);
 				}
@@ -398,7 +381,7 @@ final class Yaf_Dispatcher
 				try {
 					throw new Yaf_Exception_DispatchFailed('The max dispatch nesting ' . YAF_FORWARD_LIMIT . ' was reached');
 				} catch (Exception $e) {
-					if ($this->_g['catch_exception']) {
+					if (YAF_G('catch_exception')) {
 						$this->_exception_handler($request, $response, $e);
 					}
 				}
@@ -423,11 +406,11 @@ final class Yaf_Dispatcher
 	 */
 	private function _exception_handler($request, $response, &$exception)
 	{
-		if ($this->_g['in_exception'] || !$exception) {
+		if (YAF_G('in_exception') || !$exception) {
 			return;
 		}
 
-		$this->_g['in_exception'] = true;
+		YAF_G('in_exception', true);
 
 		$module = $request->getModuleName();
 		if (!$module || !is_string($module) || !strlen($module)) {

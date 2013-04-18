@@ -11,35 +11,17 @@
 
 final class Yaf_Application
 {
-	protected static $_app = null;
+	protected static $_app;
 
-	protected $_config = null;
-	protected $_dispatcher;
-	protected $_modules = array();
+	protected $config;
+	protected $dispatcher;
 
-	protected $_run = false;
+	protected $_modules;
+	protected $_running = false;
 	protected $_environ = YAF_ENVIRON;
 
 	protected $_err_no = 0;
 	protected $_err_msg = '';
-
-	private $_g = array(
-		'directory' => '',
-		'ext' => 'php',
-		'global_library' => YAF_LIBRARY,
-		'local_library' => null,
-		'local_namespaces' => '',
-		'view_ext' => 'phtml',
-		'base_uri' => null,
-		'default_module' => 'index',
-		'default_controller' => 'index',
-		'default_action' => 'index',
-		'default_route' => array(),
-		'throw_exception' => true,
-		'catch_exception' => false,
-		'in_exception' => false,
-		'modules' => array(),
-	);
 
 	/**
 	 * __construct
@@ -63,15 +45,15 @@ final class Yaf_Application
 
 		// yaf_config_instance
 		if (is_string($config)) {
-			$this->_config = new Yaf_Config_Ini($config, $section);
+			$this->config = new Yaf_Config_Ini($config, $section);
 		}
 		if (is_array($config)) {
-			$this->_config = new Yaf_Config_Simple($config, true);
+			$this->config = new Yaf_Config_Simple($config, true);
 		}
 
-		if (is_null($this->_config)
-				|| !is_object($this->_config)
-				|| !($this->_config instanceof Yaf_Config_Abstract)
+		if (is_null($this->config)
+				|| !is_object($this->config)
+				|| !($this->config instanceof Yaf_Config_Abstract)
 				|| $this->_parse_option() == false) {
 			unset($this);
 			throw new Yaf_Exception_StartupError('Initialization of application config failed');
@@ -79,8 +61,8 @@ final class Yaf_Application
 		}
 
 		// yaf_request_instance
-		$request = new Yaf_Request_Http(null, $this->_g['base_uri']);
-		unset($this->_g['base_uri']);
+		$request = new Yaf_Request_Http(null, YAF_G('base_uri'));
+		YAF_G('base_uri', null);
 
 		if(!$request){
 			throw new Yaf_Exception_StartupError('Initialization of request failed');
@@ -88,24 +70,24 @@ final class Yaf_Application
 		}
 
 		// yaf_dispatcher_instance
-		$this->_dispatcher = Yaf_Dispatcher::getInstance($this->_g);
-		if (is_null($this->_dispatcher)
-				|| !is_object($this->_dispatcher)
-				|| !($this->_dispatcher instanceof Yaf_Dispatcher)) {
+		$this->dispatcher = Yaf_Dispatcher::getInstance();
+		if (is_null($this->dispatcher)
+				|| !is_object($this->dispatcher)
+				|| !($this->dispatcher instanceof Yaf_Dispatcher)) {
 			unset($this);
 			throw new Yaf_Exception_StartupError('Instantiation of application dispatcher failed');
 			return false;
 		}
-		$this->_dispatcher->setRequest($request);
+		$this->dispatcher->setRequest($request);
 
 		// yaf_loader_instance
-		if ($this->_g['local_library']) {
-			$loader = Yaf_Loader::getInstance($this->_g['local_library'], $this->_g['global_library']);
+		if (YAF_G('local_library')) {
+			$loader = Yaf_Loader::getInstance(YAF_G('local_library'), YAF_G('global_library'));
 		} else {
-			$local_library = $this->_g['directory'] . '/library';
-			$loader = Yaf_Loader::getInstance($local_library, $this->_g['global_library']);
+			$local_library = YAF_G('directory') . '/library';
+			$loader = Yaf_Loader::getInstance($local_library, YAF_G('global_library'));
 		}
-		unset($this->_g['local_library']);
+		YAF_G('local_library', null);
 
 		if (!$loader) {
 			unset($this);
@@ -113,15 +95,14 @@ final class Yaf_Application
 			return false;
 		}
 
-		$this->_run = false;
+		$this->_running = false;
 
-		if ($this->_g['modules']) {
-			$this->_modules = $this->_g['modules'];
-			
+		if (YAF_G('modules')) {
+			$this->_modules = YAF_G('modules');
 		} else {
 			$this->_modules = null;
 		}
-		unset($this->_g['modules']);
+		YAF_G('modules', null);
 
 		self::$_app = $this;
 	}
@@ -131,21 +112,18 @@ final class Yaf_Application
 	 * run
 	 *
 	 * @param void
-	 * @return mixed
+	 * @return boolean | string
 	 */
 	public function run()
 	{
-		if (is_bool($this->_run) && $this->_run) {
+		if (is_bool($this->_running) && $this->_running) {
 			throw new Yaf_Exception_StartupError('An application instance already run');
 			return true;
 		}
-
-		$this->_run = true;
-
-		if ($response = $this->_dispatcher->dispatch($this->_dispatcher->getRequest())) {
+		$this->_running = true;
+		if ($response = $this->dispatcher->dispatch($this->dispatcher->getRequest())) {
 			return $response;
 		}
-
 		return false;
 	}
 
@@ -218,16 +196,16 @@ final class Yaf_Application
 	 * bootstrap
 	 *
 	 * @param void
-	 * @return Yaf_Application
+	 * @return boolean | Yaf_Application
 	 */
 	public function bootstrap()
 	{
 		$retval = true;
 		if (!class_exists('Bootstrap')) {
-			if (isset($this->_g['bootstrap'])) {
-				$bootstrap_path = $this->_g['bootstrap'];
+			if (YAF_G('bootstrap')) {
+				$bootstrap_path = YAF_G('bootstrap');
 			} else {
-				$bootstrap_path = $this->_g['directory'] . '/Bootstrap.' . $this->_g['ext'];
+				$bootstrap_path = YAF_G('directory') . '/Bootstrap.' . YAF_G('ext');
 			}
 
 			if (!Yaf_Loader::import($bootstrap_path)) {
@@ -250,7 +228,7 @@ final class Yaf_Application
 			if (strncasecmp($func, '_init', 5)) {
 				continue;
 			}
-			call_user_func(array($bootstrap, $func), $this->_dispatcher);
+			call_user_func(array($bootstrap, $func), $this->dispatcher);
 		}
 		unset($bootstrap);
 
@@ -265,7 +243,7 @@ final class Yaf_Application
 	 */
 	public function getConfig()
 	{
-		return $this->_config;
+		return $this->config;
 	}
 
 	/**
@@ -287,23 +265,23 @@ final class Yaf_Application
 	 */
 	public function getDispatcher()
 	{
-		return $this->_dispatcher;
+		return $this->dispatcher;
 	}
 
 	/**
 	 * setAppDirectory
 	 *
 	 * @param string $directory
-	 * @return Yaf_Application
+	 * @return boolean | Yaf_Application
 	 */
 	public function setAppDirectory($directory)
 	{
 		if (is_string($directory)
 				&& ($directory = realpath($directory))) {
-			$this->_g['directory'] = $directory;
+			YAF_G('directory', $directory);
+			return $this;
 		}
-
-		return $this;
+		return false;
 	}
 
 	/**
@@ -314,7 +292,7 @@ final class Yaf_Application
 	 */
 	public function getAppDirectory()
 	{
-		return $this->_g['directory'];
+		return YAF_G('directory');
 	}
 
 	/**
@@ -349,7 +327,6 @@ final class Yaf_Application
 	{
 		$this->_err_no = 0;
 		$this->_err_msg = '';
-
 		return $this;
 	}
 
@@ -368,7 +345,7 @@ final class Yaf_Application
 	 *
 	 * @param void
 	 */
-	public function __clone()
+	private function __clone()
 	{
 		
 	}
@@ -378,7 +355,7 @@ final class Yaf_Application
 	 *
 	 * @param void
 	 */
-	public function __sleep()
+	private function __sleep()
 	{
 		
 	}
@@ -388,7 +365,7 @@ final class Yaf_Application
 	 *
 	 * @param void
 	 */
-	public function __wakeup()
+	private function __wakeup()
 	{
 		
 	}
@@ -402,7 +379,9 @@ final class Yaf_Application
 	 */
 	private function _parse_option($config = null)
 	{
-		if (is_null($config)) $config = $this->_config;
+		global $YAF_G;
+
+		if (is_null($config)) $config = $this->config;
 
 		if (!($config instanceof Yaf_Config_Abstract)){
 			return false;
@@ -427,29 +406,29 @@ final class Yaf_Application
 			return false;
 		}
 
-		$this->_g['directory'] = rtrim($app->directory, '\\ /');
+		$YAF_G['directory'] = rtrim($app->directory, '\\ /');
 
 		if (isset($app->ext) && is_string($app->ext)) {
-			$this->_g['ext'] = $app['ext'];
+			$YAF_G['ext'] = $app['ext'];
 		}
 
 		if (isset($app->bootstrap) && is_string($app->bootstrap)) {
-			$this->_g['bootstrap'] = $app->bootstrap;
+			$YAF_G['bootstrap'] = $app->bootstrap;
 		}
 
 		if (isset($app->library)) {
 			if (is_string($app->library)) {
-				$this->_g['local_library'] = $app->library;
+				$YAF_G['local_library'] = $app->library;
 			} elseif ($app->library instanceof Yaf_Config_Abstract) {
 				if (isset($app->library->directory) && is_string($app->library->directory)) {
-					$this->_g['local_library'] = $app->library->directory;
+					$YAF_G['local_library'] = $app->library->directory;
 				}
 				if (isset($app->library->namespace) && is_string($app->library->namespace)) {
 					$target = str_replace(',', DIRECTORY_SEPARATOR, $app->library->namespace);
-					if (empty($this->_g['namespaces'])) {
-						$this->_g['local_namespaces'] = $target;
+					if (empty($YAF_G['namespaces'])) {
+						$YAF_G['local_namespaces'] = $target;
 					} else {
-						$this->_g['local_namespaces'] .= $target;
+						$YAF_G['local_namespaces'] .= $target;
 					}
 				}
 			}
@@ -457,41 +436,41 @@ final class Yaf_Application
 
 		if (isset($app->view) && ($app->view instanceof Yaf_Config_Abstract)) {
 			if (isset($app->view->ext) && is_string($app->view->ext)) {
-				$this->_g['view_ext'] = $app->view->ext;
+				$YAF_G['view_ext'] = $app->view->ext;
 			}
 		}
 
 		if (isset($app->baseUri) && is_string($app->baseUri)) {
-			$this->_g['base_uri'] = $app->baseUri;
+			$YAF_G['base_uri'] = $app->baseUri;
 		}
 
 		if (isset($app->dispatcher) && ($app->dispatcher instanceof Yaf_Config_Abstract)) {
 			if (isset($app->dispatcher->defaultModule)
 					&& is_string($app->dispatcher->defaultModule)) {
-				$this->_g['default_module'] = $app->dispatcher->defaultModule;
+				$YAF_G['default_module'] = $app->dispatcher->defaultModule;
 			}
 
 			if (isset($app->dispatcher->defaultController)
 					&& is_string($app->dispatcher->defaultController)) {
-				$this->_g['default_controller'] = $app->dispatcher->defaultController;
+				$YAF_G['default_controller'] = $app->dispatcher->defaultController;
 			}
 
 			if (isset($app->dispatcher->defaultAction)
 					&& is_string($app->dispatcher->defaultAction)) {
-				$this->_g['default_action'] = $app->dispatcher->defaultAction;
+				$YAF_G['default_action'] = $app->dispatcher->defaultAction;
 			}
 
 			if (isset($app->dispatcher->defaultRoute)
 					&& ($app->dispatcher->defaultRoute instanceof Yaf_Config_Abstract)) {
-				$this->_g['default_route'] = $app->dispatcher->defaultRoute->toArray();
+				$YAF_G['default_route'] = $app->dispatcher->defaultRoute->toArray();
 			}
 
 			if (isset($app->dispatcher->throwException)) {
-				$this->_g['throw_exception'] = (boolean) $app->dispatcher->throwException;
+				$YAF_G['throw_exception'] = (boolean)$app->dispatcher->throwException;
 			}
 
 			if (isset($app->dispatcher->catchException)) {
-				$this->_g['catch_exception'] = (boolean) $app->dispatcher->catchException;
+				$YAF_G['catch_exception'] = (boolean)$app->dispatcher->catchException;
 			}
 		}
 
@@ -500,12 +479,12 @@ final class Yaf_Application
 			while ($seg) {
 				$seg = trim($seg);
 				if (strlen($seg)) {
-					$this->_g['modules'][] = $seg;
+					$YAF_G['modules'][] = $seg;
 				}
 				$seg = strtok(',');
 			}
 		} else {
-			$this->_g['modules'][] = $this->_g['default_module'];
+			$YAF_G['modules'][] = YAF_G('default_module');
 		}
 
 		if (isset($app->system) && ($app->system instanceof Yaf_Config_Abstract)) {

@@ -11,18 +11,20 @@
 
 abstract class Yaf_Request_Abstract
 {
-	protected $_method;
-	protected $_module;
-	protected $_controller;
-	protected $_action;
-	protected $_params = array();
-	protected $_language;
-	protected $_base_uri;
-	protected $_request_uri;
-	protected $_dispatched = false;
-	protected $_routed = false;
+	public $module;
+	public $controller;
+	public $action;
+	public $method;
 
-	private $_exception;
+	protected $params;
+	protected $language;
+	protected $_exception;
+	protected $_base_uri = '';
+	protected $uri = '';
+	protected $dispatched = false;
+	protected $routed = false;
+
+	
 
 	/**
 	 * isGet
@@ -32,7 +34,7 @@ abstract class Yaf_Request_Abstract
 	 */
 	public function isGet()
 	{
-		return (strtoupper($this->_method) == 'GET');
+		return (strtoupper($this->method) == 'GET');
 	}
 	
 	/**
@@ -43,7 +45,7 @@ abstract class Yaf_Request_Abstract
 	 */
 	public function isPost()
 	{
-		return (strtoupper($this->_method) == 'POST');
+		return (strtoupper($this->method) == 'POST');
 	}
 	
 	/**
@@ -54,7 +56,7 @@ abstract class Yaf_Request_Abstract
 	 */
 	public function isPut()
 	{
-		return (strtoupper($this->_method) == 'PUT');
+		return (strtoupper($this->method) == 'PUT');
 	}
 	
 	/**
@@ -65,7 +67,7 @@ abstract class Yaf_Request_Abstract
 	 */
 	public function isHead()
 	{
-		return (strtoupper($this->_method) == 'HEAD');
+		return (strtoupper($this->method) == 'HEAD');
 	}
 	
 	/**
@@ -76,7 +78,7 @@ abstract class Yaf_Request_Abstract
 	 */
 	public function isOptions()
 	{
-		return (strtoupper($this->_method) == 'OPTIONS');
+		return (strtoupper($this->method) == 'OPTIONS');
 	}
 	
 	/**
@@ -87,7 +89,7 @@ abstract class Yaf_Request_Abstract
 	 */
 	public function isCli()
 	{
-		(strtoupper($this->_method) == 'CLI');
+		(strtoupper($this->method) == 'CLI');
 	}
 
 	/**
@@ -108,142 +110,39 @@ abstract class Yaf_Request_Abstract
 	 * @param mixed $default
 	 * @return mixed
 	 */
-	public function getServer($name, $default = null)
+	public function getServer($name = null, $default = null)
 	{
-
-	}
-	
-
-	/**
-	 * getModuleName
-	 *
-	 */
-	public function getModuleName()
-	{
-		return $this->_module;
-	}
-	
-	/**
-	 * getControllerName
-	 *
-	 */
-	public function getControllerName()
-	{
-		return $this->_controller;
-	}
-	
-	/**
-	 * getActionName
-	 *
-	 */
-	public function getActionName()
-	{
-		return $this->_action;
-	}
-	
-	/**
-	 * setModuleName
-	 *
-	 */
-	public function setModuleName($name)
-	{
-		if (!is_string($name)) {
-			trigger_error('Expect a string module name', E_USER_WARNING);
-			return false;
+		if (is_null($name)) {
+			return $_SERVER;
+		} elseif (isset($_SERVER[$name])) {
+			return $_SERVER[$name];
 		}
-		$this->_module = $name;
-		return $this;
+		return $default;
 	}
 	
 	/**
-	 * setControllerName
+	 * getEnv
 	 *
+	 * @param string $name
+	 * @param mixed $default
+	 * @return mixed
 	 */
-	public function setControllerName($name)
+	public function getEnv($name = null, $default = null)
 	{
-		if (!is_string($name)) {
-			trigger_error('Expect a string controller name', E_USER_WARNING);
-			return false;
+		if (is_null($name)) {
+			return $_ENV;
+		} elseif (isset($_ENV[$name])) {
+			return $_ENV[$name];
 		}
-		$this->_controller = $name;
-		return $this;
-	}
-	
-	/**
-	 * setActionName
-	 *
-	 */
-	public function setActionName($name)
-	{
-		if (!is_string($name)) {
-			trigger_error('Expect a string action name', E_USER_WARNING);
-			return false;
-		}
-
-		$this->_action = $name;
-
-		return $this;
-	}
-	
-	/**
-	 * getException
-	 *
-	 */
-	public function getException()
-	{
-		if (is_object($this->_exception)
-				&& ($this->_exception instanceof Exception)) {
-			return $this->_exception;
-		}
-
-		return null;
-	}
-	
-	/**
-	 * setException
-	 *
-	 */
-	public function setException($exception)
-	{
-		if (is_object($this->_exception)
-				&& ($this->_exception instanceof Exception)) {
-
-			$this->_exception = $exception;
-			return $this;
-		}
-
-		return false;
+		return $default;
 	}
 
-	/**
-	 * getParams
-	 *
-	 */
-	public function getParams()
-	{
-		return $this->_params;
-	}
-	
-	/**
-	 * getParam
-	 *
-	 */
-	public function getParam($name, $dafault = null)
-	{
-		if (isset($this->_params[$name])) {
-			return $this->_params[$name];
-		}
-
-		if (!is_null($dafault)) {
-			return $dafault;
-		}
-
-		return null;
-	}
-	
 	/**
 	 * setParam
 	 *
+	 * @param mixed $name
+	 * @param mixed $value
+	 * @return boolean | Yaf_Request_Abstract
 	 */
 	public function setParam($name, $value = null)
 	{
@@ -256,103 +155,330 @@ abstract class Yaf_Request_Abstract
 			$this->_params[$name] = $value;
 			return $this;
 		}
+		return false;
+	}
+	
+	/**
+	 * getParam
+	 *
+	 * @param string $name
+	 * @param mixed $default
+	 * @return mixed
+	 */
+	public function getParam($name, $dafault = null)
+	{
+		if (isset($this->_params[$name])) {
+			return $this->_params[$name];
+		}
+		return $dafault;
+	}
+	
+	/**
+	 * getParams
+	 *
+	 * @param void
+	 * @return array
+	 */
+	public function getParams()
+	{
+		return $this->_params;
+	}
+	
+	/**
+	 * setException
+	 *
+	 * @param Exception $exception
+	 * @return boolean | Yaf_Request_Abstract
+	 */
+	public function setException($exception)
+	{
+		if (is_object($exception)
+				&& ($exception instanceof Exception)) {
+			$this->_exception = $exception;
+			return $this;
+		}
+		return false;
+	}
+
+	/**
+	 * getException
+	 *
+	 * @param void
+	 * @return Exception
+	 */
+	public function getException()
+	{
+		if (is_object($this->_exception)
+				&& ($this->_exception instanceof Exception)) {
+			return $this->_exception;
+		}
+		return null;
+	}
+	
+
+	/**
+	 * getModuleName
+	 *
+	 * @param void
+	 * @return string
+	 */
+	public function getModuleName()
+	{
+		return $this->module;
+	}
+	
+	/**
+	 * getControllerName
+	 *
+	 * @param void
+	 * @return string
+	 */
+	public function getControllerName()
+	{
+		return $this->controller;
+	}
+	
+	/**
+	 * getActionName
+	 *
+	 * @param void
+	 * @return string
+	 */
+	public function getActionName()
+	{
+		return $this->action;
+	}
+	
+	/**
+	 * setModuleName
+	 *
+	 * @param string $name
+	 * @return boolean | Yaf_Request_Abstract
+	 */
+	public function setModuleName($name)
+	{
+		if (!is_string($name)) {
+			trigger_error('Expect a string module name', E_USER_WARNING);
+			return false;
+		}
+		$this->module = $name;
+		return $this;
+	}
+	
+	/**
+	 * setControllerName
+	 *
+	 * @param string $name
+	 * @return boolean | Yaf_Request_Abstract
+	 */
+	public function setControllerName($name)
+	{
+		if (!is_string($name)) {
+			trigger_error('Expect a string controller name', E_USER_WARNING);
+			return false;
+		}
+		$this->controller = $name;
+		return $this;
+	}
+	
+	/**
+	 * setActionName
+	 *
+	 * @param string $name
+	 * @return boolean | Yaf_Request_Abstract
+	 */
+	public function setActionName($name)
+	{
+		if (!is_string($name)) {
+			trigger_error('Expect a string action name', E_USER_WARNING);
+			return false;
+		}
+		$this->action = $name;
+		return $this;
+	}
+
+	/**
+	 * getMethod
+	 *
+	 * @param void
+	 * @return string
+	 */
+	public function getMethod()
+	{
+		return $this->method;
+	}
+
+	/**
+	 * getLanguage
+	 *
+	 * @param void
+	 * @return string
+	 */
+	public function getLanguage()
+	{
+		return $this->language;
+	}
+
+	/**
+	 * setBaseUri
+	 *
+	 * @param string $base_uri
+	 * @param string $request_uri
+	 * @return boolean | Yaf_Request_Abstract
+	 */
+	public function setBaseUri($base_uri, $request_uri = '')
+	{
+		if ($base_uri && is_string($base_uri)) {
+			$this->_base_uri = $base_uri;
+			return $this;
+		} else {
+			$script_filename = $this->getServer('SCRIPT_FILENAME');
+
+			do {
+				if ($script_filename && is_string($script_filename)) {
+					$file_name = basename($script_filename, YAF_G('ext'));
+					$file_name_len = strlen($file_name);
+
+					$script_name = $this->getServer('SCRIPT_NAME');
+					if ($script_name && is_string($script_name)) {
+						$script = basename($script_name);
+
+						if (strncmp($file_name, $script, $file_name_len) == 0) {
+							$basename = $script_name;
+							break;
+						}
+					}
+
+					$phpself_name = $this->getServer('PHP_SELF');
+					if ($phpself_name && is_string($phpself_name)) {
+						$phpself = basename($phpself_name);
+						if (strncmp($file_name, $phpself, $file_name_len) == 0) {
+							$basename = $phpself_name;
+							break;
+						}
+					}
+
+					$orig_name = $this->getServer('ORIG_SCRIPT_NAME');
+					if ($orig_name && is_string($orig_name)) {
+						$orig = basename($orig_name);
+						if (strncmp($file_name, $orig, $file_name_len) == 0) {
+							$basename 	 = $orig_name;
+							break;
+						}
+					}
+				}
+			} while (0);
+
+			if ($basename && strstr($request_uri, $basename) == $request_uri) {
+				$this->_base_uri = rtrim($basename, '/');
+
+				return $this;
+			} elseif ($basename) {
+				$dirname = rtrim(dirname($basename), '/');
+				if ($dirname) {
+					if (strstr($request_uri, $dirname) == $request_uri) {
+						$this->_base_uri = $dirname;
+
+						return $this;
+					}
+				}
+			}
+
+			$this->_base_uri = '';
+
+			return $this;
+		}
 
 		return false;
 	}
 	
 	/**
-	 * getMethod
+	 * getBaseUri
 	 *
+	 * @param void
+	 * @return string
 	 */
-	public function getMethod()
+	public function getBaseUri()
 	{
-		return $this->_method;
+		return $this->_base_uri;
+	}
+
+	/**
+	 * setRequestUri
+	 *
+	 * @param string $uri
+	 * @return boolean | Yaf_Request_Abstract
+	 */
+	public function setRequestUri($uri)
+	{
+		if (is_string($uri)) {
+			$this->uri = $uri;
+			return $this;
+		}
+		return false;
 	}
 	
 	/**
+	 * getRequestUri
+	 *
+	 * @param void
+	 * @return string
+	 */
+	public function getRequestUri()
+	{
+		return $this->uri;
+	}
+
+	/**
 	 * isDispatched
 	 *
+	 * @param void
+	 * @return boolean
 	 */
 	public function isDispatched()
 	{
-		return $this->_dispatched;
+		return (boolean) $this->dispatched;
 	}
 	
 	/**
 	 * setDispatched
 	 *
+	 * @param boolean $flag
+	 * @return boolean | Yaf_Request_Abstract
 	 */
 	public function setDispatched($flag = true)
 	{
-		if (is_bool($flag) && $flag == false) {
-			$this->_dispatched = false;
-		} else {
-			$this->_dispatched = true;
+		if (is_bool($flag)) {
+			$this->dispatched = $flag;
+			return $this;
 		}
-
-		return true;
+		return false;
 	}
 	
 	/**
 	 * isRouted
 	 *
+	 * @param void
+	 * @return boolean
 	 */
 	public function isRouted()
 	{
-		return $this->_routed;
+		return $this->routed;
 	}
 	
 	/**
 	 * setRouted
 	 *
+	 * @param boolean $flag
+	 * @return boolean | Yaf_Request_Abstract
 	 */
 	public function setRouted($flag = true)
 	{
-		if (is_bool($flag) && $flag == false) {
-			$this->_routed = false;
-		} else {
-			$this->_routed = true;
+		if (is_bool($flag)) {
+			$this->routed = $flag;
+			return $this;
 		}
-
-		return $this;
+		return false;
 	}
-
-	
-	/**
-	 * getLanguage
-	 *
-	 */
-	abstract public function getLanguage();
-	
-	/**
-	 * getQuery
-	 *
-	 */
-	abstract public function getQuery($name = null);
-	
-	/**
-	 * getPost
-	 *
-	 */
-	abstract public function getPost($name = null);
-	
-	/**
-	 * getEnv
-	 *
-	 */
-	abstract public function getEnv($name = null);
-	
-
-	/**
-	 * getCookie
-	 *
-	 */
-	abstract public function getCookie($name = null);
-	
-	/**
-	 * getFiles
-	 *
-	 */
-	abstract public function getFiles($name = null);
 
 }

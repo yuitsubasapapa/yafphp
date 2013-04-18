@@ -38,6 +38,56 @@ defined('YAF_USE_SPL_AUTOLOAD') or define('YAF_USE_SPL_AUTOLOAD', true);
 // debug
 defined('YAF_DEBUG') or define('YAF_DEBUG', false);
 
+// YAF_G
+$YAF_G = array(
+	'directory' => '',
+	'ext' => 'php',
+	'global_library' => YAF_LIBRARY,
+	'local_library' => null,
+	'local_namespaces' => '',
+	'view_ext' => 'phtml',
+	'base_uri' => null,
+	'default_module' => 'index',
+	'default_controller' => 'index',
+	'default_action' => 'index',
+	'default_route' => array(),
+	'throw_exception' => true,
+	'catch_exception' => false,
+	'in_exception' => false,
+	'modules' => array(),
+);
+
+/**
+ * YAF_G
+ * 
+ * @param string $name
+ * @param mixed $value
+ * @return mixed
+ */
+function YAF_G($name, $value = null)
+{
+	global $YAF_G;
+
+	$num_args = func_num_args();
+	if ($num_args == 1) {
+		if (isset($YAF_G[$name])) {
+			return $YAF_G[$name];
+		} else {
+			return false;
+		}
+	} elseif ($num_args == 2) {
+		if (is_null($value)) {
+			unset($YAF_G[$name]);
+		} else {
+			$YAF_G[$name] = $value;
+		}
+	} elseif ($num_args > 2) {
+		$value = func_get_args();
+		array_shift($value);
+		$YAF_G[$name] = $value;
+	}
+}
+
 /**
  * __autoload
  * 
