@@ -710,9 +710,16 @@ final class Yaf_Dispatcher
 
 				/* because the action might call the forward to override the old action */
 				if (method_exists($icontroller, $func_name)) {
-					if (call_user_func_array(array($icontroller, $func_name), $func_args) == false) {
+					try {
+						if (call_user_func_array(array($icontroller, $func_name), $func_args) === false) {
+							/* no auto-render */
+							return true;
+						}
+					} catch(Exception $e) {
 						return false;
 					}
+
+					$executor = $icontroller;
 				} elseif($caction = $this->_get_action($app_dir, $icontroller, $module, $is_def_module, $action)) {
 					if (!method_exists($caction, 'execute')) {
 						return false;
@@ -720,172 +727,55 @@ final class Yaf_Dispatcher
 
 					try {
 						$iaction = new $caction($icontroller, $request, $response, $view);
+						if (call_user_func_array(array($iaction, 'execute'), $func_args) === false) {
+							/* no auto-render */
+							return true;
+						}
 					} catch(Exception $e) {
 						return false;
 					}
 
-					if (call_user_func_array(array($iaction, 'execute'), $func_args) == false) {
-						return false;
-					}
-				}
-
-/*
-
-				if (zend_hash_find(&((ce)->function_table), func_name, func_name_len + 1, (void **)&fptr) == SUCCESS) {
-					uint count = 0;
-					zval ***call_args = NULL;
-
-					ret = NULL;
-
-					executor = icontroller;
-					if (fptr->common.num_args) {
-						zval *method_name;
-
-						yaf_dispatcher_get_call_parmaters(request_ce, request, fptr, &call_args, &count TSRMLS_CC);
-						MAKE_STD_ZVAL(method_name);
-						ZVAL_STRINGL(method_name, func_name, func_name_len, 0);
-
-						call_user_function_ex(&(ce)->function_table, &icontroller, method_name, &ret, count, call_args, 1, NULL TSRMLS_CC);
-
-						efree(method_name);
-						efree(call_args);
-					} else {
-						zend_call_method(&icontroller, ce, NULL, func_name, func_name_len, &ret, 0, NULL, NULL TSRMLS_CC);
-					}
-
-					efree(func_name);
-
-					if (!ret) {
-						zval_ptr_dtor(&action);
-						zval_ptr_dtor(&icontroller);
-						return 0;
-					}
-
-					if ((Z_TYPE_P(ret) == IS_BOOL
-								&& !Z_BVAL_P(ret))) {
-						/* no auto-render * /
-						zval_ptr_dtor(&ret);
-						zval_ptr_dtor(&action);
-						zval_ptr_dtor(&icontroller);
-						return 1;
-					}
-					zval_ptr_dtor(&ret);
-				} else if ((ce = yaf_dispatcher_get_action(app_dir, icontroller,
-								Z_STRVAL_P(module), is_def_module, Z_STRVAL_P(action), Z_STRLEN_P(action) TSRMLS_CC))
-						&& (zend_hash_find(&(ce)->function_table, YAF_ACTION_EXECUTOR_NAME,
-								sizeof(YAF_ACTION_EXECUTOR_NAME), (void **)&fptr) == SUCCESS)) {
-					zval ***call_args;
-					yaf_action_t *iaction;
-					uint count = 0;
-
-					MAKE_STD_ZVAL(iaction);
-					object_init_ex(iaction, ce);
-
-					yaf_controller_construct(ce, iaction, request, response, view, NULL TSRMLS_CC);
-					executor = iaction;
-
-					zend_update_property(ce, iaction, ZEND_STRL(YAF_CONTROLLER_PROPERTY_NAME_NAME), controller TSRMLS_CC);
-					zend_update_property(ce, iaction, ZEND_STRL(YAF_ACTION_PROPERTY_NAME_CTRL), icontroller TSRMLS_CC);
-					zval_ptr_dtor(&icontroller);
-
-					if (fptr->common.num_args) {
-						zval *method_name = NULL;
-
-						yaf_dispatcher_get_call_parmaters(request_ce, request, fptr, &call_args, &count TSRMLS_CC);
-						MAKE_STD_ZVAL(method_name);
-						ZVAL_STRINGL(method_name, YAF_ACTION_EXECUTOR_NAME, sizeof(YAF_ACTION_EXECUTOR_NAME) - 1, 0);
-
-						call_user_function_ex(&(ce)->function_table, &iaction, method_name, &ret, count, call_args, 1, NULL TSRMLS_CC);
-
-						efree(method_name);
-						efree(call_args);
-					} else {
-						zend_call_method_with_0_params(&iaction, ce, NULL, "execute", &ret);
-					}
-
-					if (!ret) {
-						zval_ptr_dtor(&action);
-						zval_ptr_dtor(&iaction);
-						zval_ptr_dtor(&icontroller);
-						return 0;
-					}
-
-					if (( Z_TYPE_P(ret) == IS_BOOL
-								&& !Z_BVAL_P(ret))) {
-						/* no auto-render * /
-						zval_ptr_dtor(&ret);
-						zval_ptr_dtor(&action);
-						zval_ptr_dtor(&iaction);
-						zval_ptr_dtor(&icontroller);
-						return 1;
-					}
+					$executor = $iaction;
 				} else {
-					zval_ptr_dtor(&icontroller);
-					return 0;
+					return false;
 				}
 
-				if (executor) {
-					/* controller's property can override the Dispatcher's * /
-					int auto_render = 1;
-					render = zend_read_property(ce, executor, ZEND_STRL(YAF_CONTROLLER_PROPERTY_NAME_RENDER), 1 TSRMLS_CC);
-					instantly_flush	= zend_read_property(yaf_dispatcher_ce, dispatcher, ZEND_STRL(YAF_DISPATCHER_PROPERTY_NAME_FLUSH), 1 TSRMLS_CC);
-					if (render == EG(uninitialized_zval_ptr)) {
-						render = zend_read_property(yaf_dispatcher_ce, dispatcher, ZEND_STRL(YAF_DISPATCHER_PROPERTY_NAME_RENDER), 1 TSRMLS_CC);
-						auto_render = Z_BVAL_P(render);
-					} else if (Z_TYPE_P(render) <= IS_BOOL && !Z_BVAL_P(render)) {
-						auto_render = 0;
+				if ($executor) {
+					/* controller's property can override the Dispatcher's */
+					
+					if (property_exists($executor, 'yafAutoRender')) {
+						$auto_render = (boolean)$executor->yafAutoRender;
+					} else {
+						$auto_render = (boolean)$this->_router;
 					}
 
-					if (auto_render) {
-						ret = NULL;
-						if (!Z_BVAL_P(instantly_flush)) {
-							zend_call_method_with_1_params(&executor, ce, NULL, "render", &ret, action);
-							zval_ptr_dtor(&executor);
-
-							if (!ret) {
-								zval_ptr_dtor(&action);
-								return 0;
-							} else if (IS_BOOL == Z_TYPE_P(ret) && !Z_BVAL_P(ret)) {
-								zval_ptr_dtor(&ret);
-								zval_ptr_dtor(&action);
-								return 0;
+					if ($auto_render) {
+						if (!$this->_instantly_flush) {
+							try{
+								if (call_user_func(array($executor, 'render'), $action) === false) {
+									return false;
+								}
+							} catch(Exception $e) {
+								return false;
 							}
-
-							if (Z_TYPE_P(ret) == IS_STRING && Z_STRLEN_P(ret)) {
-								yaf_response_alter_body(response, NULL, 0, Z_STRVAL_P(ret), Z_STRLEN_P(ret), YAF_RESPONSE_APPEND  TSRMLS_CC);
-							} 
-
-							zval_ptr_dtor(&ret);
 						} else {
-							zend_call_method_with_1_params(&executor, ce, NULL, "display", &ret, action);
-							zval_ptr_dtor(&executor);
-
-							if (!ret) {
-								zval_ptr_dtor(&action);
-								return 0;
-							}
-
-							if ((Z_TYPE_P(ret) == IS_BOOL && !Z_BVAL_P(ret))) {
-								zval_ptr_dtor(&ret);
-								zval_ptr_dtor(&action);
-								return 0;
-							} else {
-								zval_ptr_dtor(&ret);
+							try{
+								if (call_user_func(array($executor, 'display'), $action) === false) {
+									return false;
+								}
+							} catch(Exception $e) {
+								return false;
 							}
 						}
-					} else {
-						zval_ptr_dtor(&executor);
 					}
-				}
-				zval_ptr_dtor(&action);
-*/				
+					
+				}				
 			}
 			return true;
 		}
 
 		return false;
 	}
-
 
 	/**
 	 * yaf_dispatcher_get_controller
@@ -965,6 +855,147 @@ final class Yaf_Dispatcher
 	{
 		include($app_dir . '/controllers/'. $action .'Action.php');
 		return $action.'Action';
+		
+/*
+		zval **ppaction, *actions_map;
+
+		actions_map = zend_read_property(Z_OBJCE_P(controller), controller, ZEND_STRL(YAF_CONTROLLER_PROPERTY_NAME_ACTIONS), 1 TSRMLS_CC);
+		if (IS_ARRAY == Z_TYPE_P(actions_map)) {
+			if (zend_hash_find(Z_ARRVAL_P(actions_map), action, len + 1, (void **)&ppaction) == SUCCESS) {
+				char *action_path;
+				uint action_path_len;
+
+				action_path_len = spprintf(&action_path, 0, "%s%c%s", app_dir, DEFAULT_SLASH, Z_STRVAL_PP(ppaction));
+				if (yaf_loader_import(action_path, action_path_len, 0 TSRMLS_CC)) {
+					zend_class_entry **ce;
+					char *class, *class_lowercase;
+					uint  class_len;
+					char *action_upper = estrndup(action, len);
+
+					*(action_upper) = toupper(*action_upper);
+
+					if (YAF_G(name_suffix)) {
+						class_len = spprintf(&class, 0, "%s%s%s", action_upper, YAF_G(name_separator), "Action");
+					} else {
+						class_len = spprintf(&class, 0, "%s%s%s", "Action", YAF_G(name_separator), action_upper);
+					}
+
+					class_lowercase = zend_str_tolower_dup(class, class_len);
+
+					if (zend_hash_find(EG(class_table), class_lowercase, class_len + 1, (void **) &ce) == SUCCESS) {
+						efree(action_path);
+						efree(action_upper);
+						efree(class_lowercase);
+
+						if (instanceof_function(*ce, yaf_action_ce TSRMLS_CC)) {
+							efree(class);
+							return *ce;
+						} else {
+							yaf_trigger_error(YAF_ERR_TYPE_ERROR TSRMLS_CC, "Action %s must extends from %s", class, yaf_action_ce->name);
+							efree(class);
+						}
+
+					} else {
+						yaf_trigger_error(YAF_ERR_NOTFOUND_ACTION TSRMLS_CC, "Could not find action %s in %s", class, action_path);
+					}
+
+					efree(action_path);
+					efree(action_upper);
+					efree(class);
+					efree(class_lowercase);
+
+				} else {
+					yaf_trigger_error(YAF_ERR_NOTFOUND_ACTION TSRMLS_CC, "Failed opening action script %s: %s", action_path, strerror(errno));
+					efree(action_path);
+				}
+			} else {
+				yaf_trigger_error(YAF_ERR_NOTFOUND_ACTION TSRMLS_CC, "There is no method %s%s in %s::$%s",
+						action, "Action", Z_OBJCE_P(controller)->name, YAF_CONTROLLER_PROPERTY_NAME_ACTIONS);
+			}
+		} else
+	/* {{{ This only effects internally * /
+		   	if (YAF_G(st_compatible)) {
+			char *directory, *class, *class_lowercase, *p;
+			uint class_len;
+			zend_class_entry **ce;
+			char *action_upper = estrndup(action, len);
+
+			/**
+			 * upper Action Name
+			 * eg: Index_sub -> Index_Sub
+			 * /
+			p = action_upper;
+			*(p) = toupper(*p);
+			while (*p != '\0') {
+				if (*p == '_'
+	#ifdef YAF_HAVE_NAMESPACE
+						|| *p == '\\'
+	#endif
+				   ) {
+					if (*(p+1) != '\0') {
+						*(p+1) = toupper(*(p+1));
+						p++;
+					}
+				}
+				p++;
+			}
+
+			if (def_module) {
+				spprintf(&directory, 0, "%s%c%s", app_dir, DEFAULT_SLASH, "actions");
+			} else {
+				spprintf(&directory, 0, "%s%c%s%c%s%c%s", app_dir, DEFAULT_SLASH,
+						"modules", DEFAULT_SLASH, module, DEFAULT_SLASH, "actions");
+			}
+
+			if (YAF_G(name_suffix)) {
+				class_len = spprintf(&class, 0, "%s%s%s", action_upper, YAF_G(name_separator), "Action");
+			} else {
+				class_len = spprintf(&class, 0, "%s%s%s", "Action", YAF_G(name_separator), action_upper);
+			}
+
+			class_lowercase = zend_str_tolower_dup(class, class_len);
+
+			if (zend_hash_find(EG(class_table), class_lowercase, class_len + 1, (void *)&ce) != SUCCESS) {
+				if (!yaf_internal_autoload(action_upper, len, &directory TSRMLS_CC)) {
+					yaf_trigger_error(YAF_ERR_NOTFOUND_ACTION TSRMLS_CC, "Failed opening action script %s: %s", directory, strerror(errno));
+
+					efree(class);
+					efree(action_upper);
+					efree(class_lowercase);
+					efree(directory);
+					return NULL;
+				} else if (zend_hash_find(EG(class_table), class_lowercase, class_len + 1, (void **) &ce) != SUCCESS)  {
+					yaf_trigger_error(YAF_ERR_AUTOLOAD_FAILED TSRMLS_CC, "Could find class %s in action script %s", class, directory);
+
+					efree(class);
+					efree(action_upper);
+					efree(class_lowercase);
+					efree(directory);
+					return NULL;
+				} else if (!instanceof_function(*ce, yaf_action_ce TSRMLS_CC)) {
+					yaf_trigger_error(YAF_ERR_TYPE_ERROR TSRMLS_CC, "Action must be an instance of %s", yaf_action_ce->name);
+
+					efree(class);
+					efree(action_upper);
+					efree(class_lowercase);
+					efree(directory);
+					return NULL;
+				}
+			}
+
+			efree(class);
+			efree(action_upper);
+			efree(class_lowercase);
+			efree(directory);
+
+			return *ce;
+		} else
+	/* }}} * /
+		{
+			yaf_trigger_error(YAF_ERR_NOTFOUND_ACTION TSRMLS_CC, "There is no method %s%s in %s", action, "Action", Z_OBJCE_P(controller)->name);
+		}
+*/
+		return null;
 	}
 
 	/**
