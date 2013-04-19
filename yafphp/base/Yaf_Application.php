@@ -201,7 +201,7 @@ final class Yaf_Application
 	public function bootstrap()
 	{
 		$retval = true;
-		if (!class_exists('Bootstrap')) {
+		if (!class_exists('Bootstrap', false)) {
 			if (YAF_G('bootstrap')) {
 				$bootstrap_path = YAF_G('bootstrap');
 			} else {
@@ -211,7 +211,7 @@ final class Yaf_Application
 			if (!Yaf_Loader::import($bootstrap_path)) {
 				trigger_error('Couldn\'t find bootstrap file ' . $bootstrap_path, E_USER_WARNING);
 				return false;
-			} elseif (!class_exists('Bootstrap')) {
+			} elseif (!class_exists('Bootstrap', false)) {
 				trigger_error('Couldn\'t find class Bootstrap in ' . $bootstrap_path, E_USER_WARNING);
 				return false;
 			} else {
@@ -488,7 +488,9 @@ final class Yaf_Application
 
 		if (isset($app->system) && ($app->system instanceof Yaf_Config_Abstract)) {
 			foreach ($app->system as $key => $value) {
-				if (is_string($key)) @ini_set($key, (string)$value);
+				if (is_string($key)) {
+					$YAF_G[$key] = (string)$value;
+				}
 			}
 		}
 

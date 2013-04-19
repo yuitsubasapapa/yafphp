@@ -100,14 +100,21 @@ final class Yaf_Dispatcher
 	/**
 	 * initView
 	 *
+	 * @param string $tpl_dir
+	 * @param array $options
 	 * @return boolean | Yaf_View_Interface
 	 */
-	public function initView()
+	public function initView($tpl_dir = null, $options = null)
 	{
 		if ($this->_view && is_object($this->_view)
 				&& ($this->_view instanceof Yaf_View_Interface)) {
 			return $this->_view;
 		}
+
+		if ($this->_view = new Yaf_View_Simple($tpl_dir, $options)) {
+			return $this->_view;
+		}
+
 		return false;
 	}
 
@@ -386,7 +393,10 @@ final class Yaf_Dispatcher
 				}
 			}
 
-			$view = $this->initView();
+			if (!($view = $this->initView())) {
+				return false;
+			}
+
 			$nesting = YAF_FORWARD_LIMIT;
 			do {
 				// preDispatch
@@ -538,7 +548,10 @@ final class Yaf_Dispatcher
 		$request->setDispatched(false);
 		unset($exception);
 
-		$view = $this->initView();
+		if (!($view = $this->initView())) {
+			return false;
+		}
+
 		try {
 			$this->_handle($request, $response, $view);
 		} catch (Exception $e) {
@@ -643,6 +656,7 @@ final class Yaf_Dispatcher
 				throw new Yaf_Exception_LoadFailed_Module('There is no module ' . $module);
 				return false;
 			}
+
 			// controller
 			$controller	= $request->getControllerName();
 			if (empty($controller) || !is_string($controller)) {
@@ -658,98 +672,64 @@ final class Yaf_Dispatcher
 				$is_def_ctr = true;
 			} */
 
-			$ce = $this->_get_controller($app_dir, $module, $controller, $is_def_module);
-			if (!$ce) {
+			$ccontroller = $this->_get_controller($app_dir, $module, $controller, $is_def_module);
+			if (!$ccontroller) {
 				return false;
 			} else {
+				try {
+					$icontroller = new $ccontroller($request, $response, $view);
+				} catch(Exception $e) {
+					return false;
+				}
+
+				try {
+					$view_dir = $view->getScriptPath();
+				} catch(Exception $e) {
+					return false;
+				}
+
+				if (empty($view_dir) || !is_string($view_dir)) {
+					/* view directory might be set by _constructor */
+					if ($is_def_module) {
+						$view_dir = $app_dir . '/views';
+					} else {
+						$view_dir = $app_dir . '/modules/' . $module . '/views';
+					}
+					/** tell the view engine where to find templates */
+					try{
+						$view->setScriptPath($view_dir);
+					} catch(Exception $e) {
+						return false;
+					}
+				}
+
+				// action
+				$action = $request->getActionName();
+				$func_name = strtolower($action) . 'Action';
+				$func_args = $request->getParams();
+
+				/* because the action might call the forward to override the old action */
+				if (method_exists($icontroller, $func_name)) {
+					if (call_user_func_array(array($icontroller, $func_name), $func_args) == false) {
+						return false;
+					}
+				} elseif($caction = $this->_get_action($app_dir, $icontroller, $module, $is_def_module, $action)) {
+					if (!method_exists($caction, 'execute')) {
+						return false;
+					}
+
+					try {
+						$iaction = new $caction($icontroller, $request, $response, $view);
+					} catch(Exception $e) {
+						return false;
+					}
+
+					if (call_user_func_array(array($iaction, 'execute'), $func_args) == false) {
+						return false;
+					}
+				}
+
 /*
-				zend_class_entry *view_ce = NULL;
-				zval  *action, *render, *view_dir = NULL, *ret = NULL;
-				char  *action_lower, *func_name;
-				uint  func_name_len;
-
-				yaf_controller_t *icontroller;
-
-				MAKE_STD_ZVAL(icontroller);
-				object_init_ex(icontroller, ce);
-
-				/* cause controller's constructor is a final method, so it must be a internal function
-				   do {
-				   zend_function *constructor = NULL;
-				   constructor = Z_OBJ_HT_P(exec_ctr)->get_constructor(exec_ctr TSRMLS_CC);
-				   if (constructor != NULL) {
-				   if (zend_call_method_with_2_params(&exec_ctr, *ce
-				   , &constructor, NULL, &ret, request, response) == NULL) {
-				   yaf_trigger_error(YAF_ERR_CALL_FAILED, "function call for %s::__construct failed", (*ce)->name);
-				   return 0;
-				   }
-				   }
-				   } while(0);
-				   * /
-				yaf_controller_construct(ce, icontroller, request, response, view, NULL TSRMLS_CC);
-				if (EG(exception)) {
-					zval_ptr_dtor(&icontroller);
-					return 0;
-				}
-			
-
-				if ((view_ce = Z_OBJCE_P(view)) == yaf_view_simple_ce) {
-					view_dir = zend_read_property(view_ce, view, ZEND_STRL(YAF_VIEW_PROPERTY_NAME_TPLDIR), 1 TSRMLS_CC);
-				} else {
-					zend_call_method_with_0_params(&view, view_ce, NULL, "getscriptpath", &view_dir);
-					if (EG(exception)) {
-						if (view_dir) {
-							zval_ptr_dtor(&view_dir);
-						}
-						zval_ptr_dtor(&icontroller);
-						return 0;
-					}
-				}
-
-				if (!view_dir || IS_STRING != Z_TYPE_P(view_dir) || !Z_STRLEN_P(view_dir)) {
-					/* view directory might be set by _constructor * /
-					MAKE_STD_ZVAL(view_dir);
-					Z_TYPE_P(view_dir) = IS_STRING;
-
-					if (is_def_module) {
-						Z_STRLEN_P(view_dir) = spprintf(&(Z_STRVAL_P(view_dir)), 0, "%s/%s", app_dir ,"views");
-					} else {
-						Z_STRLEN_P(view_dir) = spprintf(&(Z_STRVAL_P(view_dir)), 0, "%s/%s/%s/%s", app_dir,
-								"modules", Z_STRVAL_P(module), "views");
-					}
-
-					/** tell the view engine where to find templates * /
-					if (view_ce == yaf_view_simple_ce) {
-						zend_update_property(view_ce, view,  ZEND_STRL(YAF_VIEW_PROPERTY_NAME_TPLDIR), view_dir TSRMLS_CC);
-					} else {
-						zend_call_method_with_1_params(&view, view_ce, NULL, "setscriptpath", &ret, view_dir);
-					}
-
-					if (ret) {
-						zval_ptr_dtor(&ret);
-						ret = NULL;
-					}
-
-				    zval_ptr_dtor(&view_dir);
-
-					if (EG(exception)) {
-						zval_ptr_dtor(&icontroller);
-						return 0;
-					}
-				} else if (view_ce != yaf_view_simple_ce) {
-					zval_ptr_dtor(&view_dir);
-				}
-
-				zend_update_property(ce, icontroller, ZEND_STRL(YAF_CONTROLLER_PROPERTY_NAME_NAME),	controller TSRMLS_CC);
-
-				action		 = zend_read_property(request_ce, request, ZEND_STRL(YAF_REQUEST_PROPERTY_NAME_ACTION), 1 TSRMLS_CC);
-				action_lower = zend_str_tolower_dup(Z_STRVAL_P(action), Z_STRLEN_P(action));
-
-				/* because the action might call the forward to override the old action * /
-				Z_ADDREF_P(action);
-
-				func_name_len = spprintf(&func_name,  0, "%s%s", action_lower, "action");
-				efree(action_lower);
 
 				if (zend_hash_find(&((ce)->function_table), func_name, func_name_len + 1, (void **)&fptr) == SUCCESS) {
 					uint count = 0;
@@ -931,37 +911,60 @@ final class Yaf_Dispatcher
 				$class = 'Controller' . YAF_NAME_SEPARATOR . $controller;
 			}
 
-			if (!class_exists($class)) {
+			if (!class_exists($class, false)) {
+				$file_name = $controller;
+				if (($pos = strpos($file_name, '_')) !== false) {
+					$file_name[$pos] = '/';
+				}
 
-			}
-/*
-			if (zend_hash_find(EG(class_table), class_lowercase, class_len + 1, (void *)&ce) != SUCCESS) {
-
-				if (!yaf_internal_autoload(controller, len, &directory TSRMLS_CC)) {
-					yaf_trigger_error(YAF_ERR_NOTFOUND_CONTROLLER TSRMLS_CC, "Failed opening controller script %s: %s", directory, strerror(errno));
-					efree(class);
-					efree(class_lowercase);
-					efree(directory);
-					return NULL;
-				} else if (zend_hash_find(EG(class_table), class_lowercase, class_len + 1, (void **) &ce) != SUCCESS)  {
-					yaf_trigger_error(YAF_ERR_AUTOLOAD_FAILED TSRMLS_CC, "Could not find class %s in controller script %s", class, directory);
-					efree(class);
-					efree(class_lowercase);
-					efree(directory);
-					return 0;
-				} else if (!instanceof_function(*ce, yaf_controller_ce TSRMLS_CC)) {
-					yaf_trigger_error(YAF_ERR_TYPE_ERROR TSRMLS_CC, "Controller must be an instance of %s", yaf_controller_ce->name);
-					efree(class);
-					efree(class_lowercase);
-					efree(directory);
-					return 0;
+				if (YAF_G('lowcase_path')) {
+					$file_name = strtolower($file_name);
+				}
+				
+				$file_path = $directory . '/' . $file_name . '.' . YAF_G('ext');
+				if (is_file($file_path) && include($file_path)) {
+					if (!class_exists($class, false)) {
+						throw new Yaf_Exception_LoadFailed('Could not find class ' . $class . ' in controller script ' . $file_path);
+						return false;
+					} else {
+						$root_class = $class;
+						while($root_class = get_parent_class($root_class)) {
+							if ($root_class == 'Yaf_Controller_Abstract') {
+								break;
+							}
+						}
+						if (!$root_class) {
+							throw new Yaf_Exception_TypeError('Controller must be an instance of Yaf_Controller_Abstract');
+							return false;
+						}
+					}
+					echo get_parent_class();
+				} else {
+					throw new Yaf_Exception_LoadFailed_Controller('Failed opening controller script ' . $file_path . ':' . YAF_ERR_NOTFOUND_CONTROLLER);
+					return false;
 				}
 			}
-*/
+
 			return $class;
 		}
 
 		return false;
+	}
+
+	/**
+	 * yaf_dispatcher_get_action
+	 *
+	 * @param string $app_dir
+	 * @param Yaf_Controller_Abstract $controller
+	 * @param string $module
+	 * @param boolean $def_module
+	 * @param string $action
+	 * @return boolean | string
+	 */
+	private function _get_action($app_dir, $controller, $module, $def_module, $action)
+	{
+		include($app_dir . '/controllers/'. $action .'Action.php');
+		return $action.'Action';
 	}
 
 	/**

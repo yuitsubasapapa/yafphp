@@ -105,6 +105,8 @@ function __autoload($classname)
 			$classpath	= dirname(__FILE__) . '/base/' . $classfile . '.php';
 			if (is_file($classpath)) include($classpath);
 		}
+	} else {
+		Yaf_Loader::autoload($classname);
 	}
 
 	return class_exists($classname, false) || interface_exists($classname, false);

@@ -24,8 +24,6 @@ abstract class Yaf_Request_Abstract
 	protected $dispatched = false;
 	protected $routed = false;
 
-	
-
 	/**
 	 * isGet
 	 *
