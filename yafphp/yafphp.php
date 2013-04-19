@@ -106,7 +106,9 @@ function __autoload($classname)
 			if (is_file($classpath)) include($classpath);
 		}
 	} else {
-		Yaf_Loader::autoload($classname);
+		if ($loader = Yaf_Loader::getInstance()) {
+			$loader->autoload($classname);
+		}
 	}
 
 	return class_exists($classname, false) || interface_exists($classname, false);

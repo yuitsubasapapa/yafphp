@@ -802,36 +802,23 @@ final class Yaf_Dispatcher
 			}
 
 			if (!class_exists($class, false)) {
-				$file_name = $controller;
-				if (($pos = strpos($file_name, '_')) !== false) {
-					$file_name[$pos] = '/';
-				}
-
-				if (YAF_G('lowcase_path')) {
-					$file_name = strtolower($file_name);
-				}
-				
-				$file_path = $directory . '/' . $file_name . '.' . YAF_G('ext');
-				if (is_file($file_path) && include($file_path)) {
-					if (!class_exists($class, false)) {
-						throw new Yaf_Exception_LoadFailed('Could not find class ' . $class . ' in controller script ' . $file_path);
-						return false;
-					} else {
-						$root_class = $class;
-						while($root_class = get_parent_class($root_class)) {
-							if ($root_class == 'Yaf_Controller_Abstract') {
-								break;
-							}
-						}
-						if (!$root_class) {
-							throw new Yaf_Exception_TypeError('Controller must be an instance of Yaf_Controller_Abstract');
-							return false;
-						}
-					}
-					echo get_parent_class();
-				} else {
+				if (!$this->_internal_autoload($controller, $directory, $file_path)) {
 					throw new Yaf_Exception_LoadFailed_Controller('Failed opening controller script ' . $file_path . ':' . YAF_ERR_NOTFOUND_CONTROLLER);
 					return false;
+				} elseif (!class_exists($class, false)) {
+					throw new Yaf_Exception_LoadFailed('Could not find class ' . $class . ' in controller script ' . $file_path);
+					return false;
+				} else {
+					$root_class = $class;
+					while($root_class = get_parent_class($root_class)) {
+						if ($root_class == 'Yaf_Controller_Abstract') {
+							break;
+						}
+					}
+					if (!$root_class) {
+						throw new Yaf_Exception_TypeError('Controller must be an instance of Yaf_Controller_Abstract');
+						return false;
+					}
 				}
 			}
 
@@ -853,149 +840,76 @@ final class Yaf_Dispatcher
 	 */
 	private function _get_action($app_dir, $controller, $module, $def_module, $action)
 	{
-		include($app_dir . '/controllers/'. $action .'Action.php');
-		return $action.'Action';
-		
-/*
-		zval **ppaction, *actions_map;
+		if (is_array($controller->actions)) {
+			if (isset($controller->actions[$action])) {
+				$action_path = $app_dir . '/' . $controller->actions[$action];
 
-		actions_map = zend_read_property(Z_OBJCE_P(controller), controller, ZEND_STRL(YAF_CONTROLLER_PROPERTY_NAME_ACTIONS), 1 TSRMLS_CC);
-		if (IS_ARRAY == Z_TYPE_P(actions_map)) {
-			if (zend_hash_find(Z_ARRVAL_P(actions_map), action, len + 1, (void **)&ppaction) == SUCCESS) {
-				char *action_path;
-				uint action_path_len;
+				if (Yaf_Loader::import($action_path)) {
+					$action = ucfirst(strtolower($action));
 
-				action_path_len = spprintf(&action_path, 0, "%s%c%s", app_dir, DEFAULT_SLASH, Z_STRVAL_PP(ppaction));
-				if (yaf_loader_import(action_path, action_path_len, 0 TSRMLS_CC)) {
-					zend_class_entry **ce;
-					char *class, *class_lowercase;
-					uint  class_len;
-					char *action_upper = estrndup(action, len);
-
-					*(action_upper) = toupper(*action_upper);
-
-					if (YAF_G(name_suffix)) {
-						class_len = spprintf(&class, 0, "%s%s%s", action_upper, YAF_G(name_separator), "Action");
+					if (YAF_NAME_SUFFIX) {
+						$class = $action . YAF_NAME_SEPARATOR . 'Action';
 					} else {
-						class_len = spprintf(&class, 0, "%s%s%s", "Action", YAF_G(name_separator), action_upper);
+						$class = 'Action' . YAF_NAME_SEPARATOR . $action;
 					}
 
-					class_lowercase = zend_str_tolower_dup(class, class_len);
-
-					if (zend_hash_find(EG(class_table), class_lowercase, class_len + 1, (void **) &ce) == SUCCESS) {
-						efree(action_path);
-						efree(action_upper);
-						efree(class_lowercase);
-
-						if (instanceof_function(*ce, yaf_action_ce TSRMLS_CC)) {
-							efree(class);
-							return *ce;
+					if (class_exists($class, false)) {
+						if ($class instanceof Yaf_Action_Abstract) {
+							return $class;
 						} else {
-							yaf_trigger_error(YAF_ERR_TYPE_ERROR TSRMLS_CC, "Action %s must extends from %s", class, yaf_action_ce->name);
-							efree(class);
+							throw new Yaf_Exception_TypeError('Action ' . $class . ' must extends from Yaf_Action_Abstract');
 						}
-
 					} else {
-						yaf_trigger_error(YAF_ERR_NOTFOUND_ACTION TSRMLS_CC, "Could not find action %s in %s", class, action_path);
+						throw new Yaf_Exception_LoadFailed_Action('Could not find action ' . $action . ' in '. $action_path);
 					}
-
-					efree(action_path);
-					efree(action_upper);
-					efree(class);
-					efree(class_lowercase);
-
 				} else {
-					yaf_trigger_error(YAF_ERR_NOTFOUND_ACTION TSRMLS_CC, "Failed opening action script %s: %s", action_path, strerror(errno));
-					efree(action_path);
+					throw new Yaf_Exception_LoadFailed_Action('Failed opening action script ' . $action_path. ':'. YAF_ERR_NOTFOUND_ACTION);
 				}
 			} else {
-				yaf_trigger_error(YAF_ERR_NOTFOUND_ACTION TSRMLS_CC, "There is no method %s%s in %s::$%s",
-						action, "Action", Z_OBJCE_P(controller)->name, YAF_CONTROLLER_PROPERTY_NAME_ACTIONS);
+				throw new Yaf_Exception_LoadFailed_Action('There is no method ' . $action . 'Action in ' . get_class($controller) . '::actions');
 			}
 		} else
-	/* {{{ This only effects internally * /
-		   	if (YAF_G(st_compatible)) {
-			char *directory, *class, *class_lowercase, *p;
-			uint class_len;
-			zend_class_entry **ce;
-			char *action_upper = estrndup(action, len);
-
+/* {{{ This only effects internally */
+		if (YAF_G('st_compatible')) {
 			/**
 			 * upper Action Name
 			 * eg: Index_sub -> Index_Sub
-			 * /
-			p = action_upper;
-			*(p) = toupper(*p);
-			while (*p != '\0') {
-				if (*p == '_'
-	#ifdef YAF_HAVE_NAMESPACE
-						|| *p == '\\'
-	#endif
-				   ) {
-					if (*(p+1) != '\0') {
-						*(p+1) = toupper(*(p+1));
-						p++;
-					}
-				}
-				p++;
-			}
+			 */
+			$action = ucwords($action);
 
-			if (def_module) {
-				spprintf(&directory, 0, "%s%c%s", app_dir, DEFAULT_SLASH, "actions");
+			if ($def_module) {
+				$directory = $app_dir . '/actions';
 			} else {
-				spprintf(&directory, 0, "%s%c%s%c%s%c%s", app_dir, DEFAULT_SLASH,
-						"modules", DEFAULT_SLASH, module, DEFAULT_SLASH, "actions");
+				$directory = $app_dir . '/modules/' . $module . '/actions';
 			}
 
-			if (YAF_G(name_suffix)) {
-				class_len = spprintf(&class, 0, "%s%s%s", action_upper, YAF_G(name_separator), "Action");
+			if (YAF_NAME_SUFFIX) {
+				$class = $action . YAF_NAME_SEPARATOR . 'Action';
 			} else {
-				class_len = spprintf(&class, 0, "%s%s%s", "Action", YAF_G(name_separator), action_upper);
+				$class = 'Action' . YAF_NAME_SEPARATOR . $action;
 			}
 
-			class_lowercase = zend_str_tolower_dup(class, class_len);
-
-			if (zend_hash_find(EG(class_table), class_lowercase, class_len + 1, (void *)&ce) != SUCCESS) {
-				if (!yaf_internal_autoload(action_upper, len, &directory TSRMLS_CC)) {
-					yaf_trigger_error(YAF_ERR_NOTFOUND_ACTION TSRMLS_CC, "Failed opening action script %s: %s", directory, strerror(errno));
-
-					efree(class);
-					efree(action_upper);
-					efree(class_lowercase);
-					efree(directory);
-					return NULL;
-				} else if (zend_hash_find(EG(class_table), class_lowercase, class_len + 1, (void **) &ce) != SUCCESS)  {
-					yaf_trigger_error(YAF_ERR_AUTOLOAD_FAILED TSRMLS_CC, "Could find class %s in action script %s", class, directory);
-
-					efree(class);
-					efree(action_upper);
-					efree(class_lowercase);
-					efree(directory);
-					return NULL;
-				} else if (!instanceof_function(*ce, yaf_action_ce TSRMLS_CC)) {
-					yaf_trigger_error(YAF_ERR_TYPE_ERROR TSRMLS_CC, "Action must be an instance of %s", yaf_action_ce->name);
-
-					efree(class);
-					efree(action_upper);
-					efree(class_lowercase);
-					efree(directory);
-					return NULL;
+			if (!class_exists($class, false)) {
+				if (!$this->_internal_autoload($action, $directory, $file_path)) {
+					throw new Yaf_Exception_LoadFailed_Action('Failed opening action script ' . $file_path . ':' . YAF_ERR_NOTFOUND_ACTION);
+					return false;
+				} elseif(!class_exists($class, false)) {
+					throw new Yaf_Exception_LoadFailed('Could not find class ' . $class . ' in action script ' . $file_path);
+					return false;
+				} elseif(!($class instanceof Yaf_Action_Abstract)) {
+					throw new Yaf_Exception_TypeError('Action must be an instance of Yaf_Action_Abstract');
+					return false;
 				}
 			}
 
-			efree(class);
-			efree(action_upper);
-			efree(class_lowercase);
-			efree(directory);
-
-			return *ce;
+			return $class;
 		} else
-	/* }}} * /
+/* }}} */
 		{
-			yaf_trigger_error(YAF_ERR_NOTFOUND_ACTION TSRMLS_CC, "There is no method %s%s in %s", action, "Action", Z_OBJCE_P(controller)->name);
+			throw new Yaf_Exception_LoadFailed_Action('There is no method ' . $action . 'Action in ' . get_class($controller));
 		}
-*/
-		return null;
+
+		return false;
 	}
 
 	/**
@@ -1017,6 +931,49 @@ final class Yaf_Dispatcher
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * yaf_internal_autoload
+	 *
+	 * @param string $file_name
+	 * @param string $directory
+	 * @param string $file_path
+	 * @return boolean
+	 */
+	private function _internal_autoload($file_name, $directory = null, &$file_path = null)
+	{
+		if (is_null($directory)) {
+			$loader = Yaf_Loader::getInstance();
+			if (!$loader) {
+				/* since only call from userspace can cause loader is NULL, exception throw will works well */
+				trigger_error('Yaf_Loader need to be initialize first', E_USER_WARNING);
+				return false;
+			} else {
+				if ($loader->isLocalName($file_name)) {
+					$library_path = $loader->getLibraryPath();
+				} else {
+					$library_path = $loader->getLibraryPath(true);
+				}
+			}
+
+			if (empty($library_path)) {
+				trigger_error('Yaf_Loader requires Yaf_Application(which set the library_directory) to be initialized first', E_USER_WARNING);
+				return false;
+			}
+		}
+
+		if (($pos = strpos($file_name, '_')) !== false) {
+			$file_name[$pos] = '/';
+		}
+
+		if (YAF_G('lowcase_path')) {
+			$file_name = strtolower($file_name);
+		}
+		
+		$file_path = $directory . '/' . $file_name . '.' . YAF_G('ext');
+
+		return Yaf_Loader::import($file_path);
 	}
 
 }

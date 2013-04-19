@@ -102,5 +102,3 @@ final class Yaf_Loader
 	}
 	
 }
-
-//spl_autoload_register(array('Yaf_Loader', 'autoload'));
