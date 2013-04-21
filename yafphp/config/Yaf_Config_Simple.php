@@ -78,7 +78,7 @@ final class Yaf_Config_Simple extends Yaf_Config_Abstract
 		}
 
 		trigger_error('Expect a string key name', E_USER_WARNING);
-		return false
+		return false;
 	}
 
 	/**
