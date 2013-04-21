@@ -408,13 +408,18 @@ final class Yaf_Dispatcher
 						}
 					}
 				} catch (Exception $e) {
-					if (!$this->_handle($request, $response, $view)) {
-						if (YAF_G('catch_exception')) {
-							$this->_exception_handler($request, $response, $e);
-							unset($response);
-						}
-						return false;
+					if (YAF_G('catch_exception')) {
+						$this->_exception_handler($request, $response, $e);
+						unset($response);
 					}
+				}
+
+				if (!$this->_handle($request, $response, $view)) {
+					if (YAF_G('catch_exception')) {
+						$this->_exception_handler($request, $response, $e);
+						unset($response);
+					}
+					return false;
 				}
 
 				$this->_fix_default($request);
@@ -614,15 +619,15 @@ final class Yaf_Dispatcher
 			 */
 			$request->setControllerName(ucwords($controller));
 		} else {
-			$request->setModuleName($this->_default_controller);
+			$request->setControllerName($this->_default_controller);
 		}
 
 		// action
 		$action = $request->getActionName();
 		if ($action && is_string($action)) {
-			$request->seActionName(strtolower($action));
+			$request->setActionName(strtolower($action));
 		} else {
-			$request->setModuleName($this->_default_action);
+			$request->setActionName($this->_default_action);
 		}
 
 	}

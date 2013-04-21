@@ -107,7 +107,6 @@ final class Yaf_Application
 		self::$_app = $this;
 	}
 
-
 	/**
 	 * run
 	 *
@@ -121,7 +120,8 @@ final class Yaf_Application
 			return true;
 		}
 		$this->_running = true;
-		if ($response = $this->dispatcher->dispatch($this->dispatcher->getRequest())) {
+		$request = $this->dispatcher->getRequest();
+		if ($response = $this->dispatcher->dispatch($request)) {
 			return $response;
 		}
 		return false;

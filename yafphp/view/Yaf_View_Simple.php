@@ -12,11 +12,27 @@
 class Yaf_View_Simple implements Yaf_View_Interface
 {
 	protected $_tpl_vars;
-	protected $_script_path;
+	protected $_tpl_dir;
+	protected $_options;
 
-	public function __construct()
+	/**
+	 * __construct
+	 *
+	 * @param string $tpl_dir
+	 * @param array $options
+	 */
+	public function __construct($tpl_dir, $options = null)
 	{
+		$this->_tpl_vars = array();
 
+		if ($tpl_dir && is_string($tpl_dir)) {
+			if ($tpl_dir = realpath($tpl_dir)) {
+				$this->_tpl_dir = $tpl_dir;
+			} else {
+				throw new Yaf_Exception_TypeError('Expects an absolute path for templates directory');
+				return false;
+			}
+		}
 	}
 
 	public function __isset($name)

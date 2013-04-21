@@ -146,11 +146,11 @@ abstract class Yaf_Request_Abstract
 	{
 		if (is_null($value)) {
 			if (is_array($name)) {
-				$this->_params = array_merge($this->_params, $name);
+				$this->params = array_merge($this->params, $name);
 				return $this;
 			}
 		} elseif(is_string($name)) {
-			$this->_params[$name] = $value;
+			$this->params[$name] = $value;
 			return $this;
 		}
 		return false;
@@ -165,8 +165,8 @@ abstract class Yaf_Request_Abstract
 	 */
 	public function getParam($name, $dafault = null)
 	{
-		if (isset($this->_params[$name])) {
-			return $this->_params[$name];
+		if (isset($this->params[$name])) {
+			return $this->params[$name];
 		}
 		return $dafault;
 	}
@@ -179,7 +179,7 @@ abstract class Yaf_Request_Abstract
 	 */
 	public function getParams()
 	{
-		return $this->_params;
+		return $this->params;
 	}
 	
 	/**
