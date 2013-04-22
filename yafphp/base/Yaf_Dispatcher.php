@@ -701,7 +701,7 @@ final class Yaf_Dispatcher
 						$view_dir = $app_dir . '/modules/' . $module . '/views';
 					}
 					/** tell the view engine where to find templates */
-					try{
+					try {
 						$view->setScriptPath($view_dir);
 					} catch(Exception $e) {
 						return false;
@@ -756,15 +756,19 @@ final class Yaf_Dispatcher
 
 					if ($auto_render) {
 						if (!$this->_instantly_flush) {
-							try{
-								if (call_user_func(array($executor, 'render'), $action) === false) {
+							try {
+								if (($content = call_user_func(array($executor, 'render'), $action)) === false) {
 									return false;
 								}
 							} catch(Exception $e) {
 								return false;
 							}
+
+							if ($content && is_string($content)) {
+								$response->appendBody($content);
+							}
 						} else {
-							try{
+							try {
 								if (call_user_func(array($executor, 'display'), $action) === false) {
 									return false;
 								}

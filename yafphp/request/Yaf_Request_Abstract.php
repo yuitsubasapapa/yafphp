@@ -172,6 +172,21 @@ abstract class Yaf_Request_Abstract
 	}
 	
 	/**
+	 * setParams
+	 *
+	 * @param array
+	 * @return boolean | Yaf_Request_Abstract
+	 */
+	public function setParams($params)
+	{
+		if (is_array($params)) {
+			$this->params = $params;
+			return $this;
+		}
+		return false;
+	}
+	
+	/**
 	 * getParams
 	 *
 	 * @param void

@@ -6,10 +6,12 @@
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
-// | Author: zmrnet <zmrnet@qq.com>
+// | Author: baoqiang <zmrnet@qq.com>
 // +----------------------------------------------------------------------
 
 final class Yaf_Response_Http extends Yaf_Response_Abstract
 {
-	protected $_code = 200;
+	protected $_sendheader = true;
+	protected $_response_code = 200;
+	
 }
