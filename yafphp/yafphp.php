@@ -89,6 +89,61 @@ function YAF_G($name, $value = null)
 }
 
 /**
+ * yaf_trigger_error
+ * 
+ * @param string $message
+ * @param integer $code
+ */
+function yaf_trigger_error($message, $code)
+{
+	if (YAF_G('throw_exception')) {
+		switch ($code) {
+			case E_USER_ERROR:
+			case E_USER_NOTICE:
+			case E_USER_WARNING:
+				trigger_error($message, $code);
+				break;
+			case YAF_ERR_STARTUP_FAILED:
+				throw new Yaf_Exception_StartupError($message);
+				break;
+			case YAF_ERR_ROUTE_FAILED:
+				throw new Yaf_Exception_RouterFailed($message);
+				break;
+			case YAF_ERR_DISPATCH_FAILED:
+				throw new Yaf_Exception_DispatchFailed($message);
+				break;
+			case YAF_ERR_NOTFOUND_MODULE:
+				throw new Yaf_Exception_LoadFailed_Module($message);
+				break;
+			case YAF_ERR_NOTFOUND_CONTROLLER:
+				throw new Yaf_Exception_LoadFailed_Controller($message);
+				break;
+			case YAF_ERR_NOTFOUND_ACTION:
+				throw new Yaf_Exception_LoadFailed_Action($message);
+				break;
+			case YAF_ERR_NOTFOUND_VIEW:
+				throw new Yaf_Exception_LoadFailed_View($message);
+				break;
+			case YAF_ERR_CALL_FAILED:
+				throw new Yaf_Exception($message, $code);
+				break;
+			case YAF_ERR_AUTOLOAD_FAILED:
+				throw new Yaf_Exception_LoadFailed($message);
+				break;
+			case YAF_ERR_TYPE_ERROR:
+				throw new Yaf_Exception_TypeError($message, $code);
+				break;
+			default:
+				throw new Yaf_Exception($message, $code);
+				break;
+		}
+	} else {
+		Yaf_Application::app()->setLastError($message, $code);
+		trigger_error($message, E_USER_NOTICE);
+	}
+}
+
+/**
  * __autoload
  * 
  * @param string $classname

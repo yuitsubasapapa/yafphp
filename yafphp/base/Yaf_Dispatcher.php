@@ -329,7 +329,7 @@ final class Yaf_Dispatcher
 			}
 
 			if (!$request || !is_object($request)) {
-				throw new Yaf_Exception_TypeError('Expect a Yaf_Request_Abstract instance');
+				yaf_trigger_error('Expect a Yaf_Request_Abstract instance', YAF_ERR_TYPE_ERROR);
 				unset($response);
 				return false;
 			}
@@ -347,11 +347,13 @@ final class Yaf_Dispatcher
 				} catch (Exception $e) {
 					if (YAF_G('catch_exception')) {
 						$this->_exception_handler($request, $response, $e);
+					} else {
+						yaf_trigger_error($e->getMessage(), $e->getCode());
 					}
 				}
 
 				if (!$this->_route($request)) {
-					throw new Yaf_Exception_RouterFailed('Routing request failed');
+					yaf_trigger_error('Routing request failed', YAF_ERR_ROUTE_FAILED);
 					unset($response);
 					return false;
 				}
@@ -369,8 +371,10 @@ final class Yaf_Dispatcher
 				} catch (Exception $e) {
 					if (YAF_G('catch_exception')) {
 						$this->_exception_handler($request, $response, $e);
-						unset($response);
+					} else {
+						yaf_trigger_error($e->getMessage(), $e->getCode());
 					}
+					unset($response);
 				}
 
 				$request->setRouted();
@@ -389,8 +393,10 @@ final class Yaf_Dispatcher
 			} catch (Exception $e) {
 				if (YAF_G('catch_exception')) {
 					$this->_exception_handler($request, $response, $e);
-					unset($response);
+				} else {
+					yaf_trigger_error($e->getMessage(), $e->getCode());
 				}
+				unset($response);
 			}
 
 			if (!($view = $this->initView())) {
@@ -410,15 +416,21 @@ final class Yaf_Dispatcher
 				} catch (Exception $e) {
 					if (YAF_G('catch_exception')) {
 						$this->_exception_handler($request, $response, $e);
-						unset($response);
+					} else {
+						yaf_trigger_error($e->getMessage(), $e->getCode());
 					}
+					unset($response);
 				}
 
-				if (!$this->_handle($request, $response, $view)) {
+				try {
+					$this->_handle($request, $response, $view);
+				} catch (Exception $e) {
 					if (YAF_G('catch_exception')) {
 						$this->_exception_handler($request, $response, $e);
-						unset($response);
+					} else {
+						yaf_trigger_error($e->getMessage(), $e->getCode());
 					}
+					unset($response);
 					return false;
 				}
 
@@ -435,8 +447,10 @@ final class Yaf_Dispatcher
 				} catch (Exception $e) {
 					if (YAF_G('catch_exception')) {
 						$this->_exception_handler($request, $response, $e);
-						unset($response);
+					} else {
+						yaf_trigger_error($e->getMessage(), $e->getCode());
 					}
+					unset($response);
 				}
 			} while (--$nesting > 0 && !$request->isDispatched());
 
@@ -451,16 +465,20 @@ final class Yaf_Dispatcher
 			} catch (Exception $e) {
 				if (YAF_G('catch_exception')) {
 					$this->_exception_handler($request, $response, $e);
-					unset($response);
+				} else {
+					yaf_trigger_error($e->getMessage(), $e->getCode());
 				}
+				unset($response);
 			}
 
 			if (0 == $nesting && !$request->isDispatched()) {
 				try {
-					throw new Yaf_Exception_DispatchFailed('The max dispatch nesting ' . YAF_FORWARD_LIMIT . ' was reached');
+					yaf_trigger_error('The max dispatch nesting ' . YAF_FORWARD_LIMIT . ' was reached', YAF_ERR_DISPATCH_FAILED);
 				} catch (Exception $e) {
 					if (YAF_G('catch_exception')) {
 						$this->_exception_handler($request, $response, $e);
+					} else {
+						yaf_trigger_error($e->getMessage(), $e->getCode());
 					}
 				}
 				unset($response);
@@ -586,7 +604,7 @@ final class Yaf_Dispatcher
 				/* user custom router */
 				if (!method_exists($this->_router, 'route')
 						|| $this->_router->route($request) === false) {
-					throw new Yaf_Exception_RouterFailed('Routing request failed');
+					yaf_trigger_error('Routing request failed', YAF_ERR_ROUTE_FAILED);
 					return false;
 				}
 			}
@@ -646,7 +664,7 @@ final class Yaf_Dispatcher
 		$request->setDispatched(true);
 
 		if (!$app_dir) {
-			throw new Yaf_Exception_StartupError('Yaf_Dispatcher requires Yaf_Application(which set the application.directory) to be initialized first');
+			yaf_trigger_error('Yaf_Dispatcher requires Yaf_Application(which set the application.directory) to be initialized first', YAF_ERR_STARTUP_FAILED);
 			return false;
 		} else {
 			$is_def_module = false;
@@ -655,17 +673,17 @@ final class Yaf_Dispatcher
 			// module
 			$module = $request->getModuleName();
 			if (empty($module) || !is_string($module)) {
-				throw new Yaf_Exception_DispatchFailed('Unexcepted a empty module name');
+				yaf_trigger_error('Unexcepted a empty module name', YAF_ERR_DISPATCH_FAILED);
 				return false;
 			} elseif (!$this->_is_module_name($module)) {
-				throw new Yaf_Exception_LoadFailed_Module('There is no module ' . $module);
+				yaf_trigger_error('There is no module ' . $module, YAF_ERR_NOTFOUND_MODULE);
 				return false;
 			}
 
 			// controller
 			$controller	= $request->getControllerName();
 			if (empty($controller) || !is_string($controller)) {
-				throw new Yaf_Exception_DispatchFailed('Unexcepted a empty controller name');
+				yaf_trigger_error('Unexcepted a empty controller name', YAF_ERR_DISPATCH_FAILED);
 				return false;
 			}
 
@@ -812,10 +830,10 @@ final class Yaf_Dispatcher
 
 			if (!class_exists($class, false)) {
 				if (!$this->_internal_autoload($controller, $directory, $file_path)) {
-					throw new Yaf_Exception_LoadFailed_Controller('Failed opening controller script ' . $file_path . ':' . YAF_ERR_NOTFOUND_CONTROLLER);
+					yaf_trigger_error('Failed opening controller script ' . $file_path . ':' . YAF_ERR_NOTFOUND_CONTROLLER, YAF_ERR_NOTFOUND_CONTROLLER);
 					return false;
 				} elseif (!class_exists($class, false)) {
-					throw new Yaf_Exception_LoadFailed('Could not find class ' . $class . ' in controller script ' . $file_path);
+					yaf_trigger_error('Could not find class ' . $class . ' in controller script ' . $file_path, YAF_ERR_AUTOLOAD_FAILED);
 					return false;
 				} else {
 					$root_class = $class;
@@ -825,7 +843,7 @@ final class Yaf_Dispatcher
 						}
 					}
 					if (!$root_class) {
-						throw new Yaf_Exception_TypeError('Controller must be an instance of Yaf_Controller_Abstract');
+						yaf_trigger_error('Controller must be an instance of Yaf_Controller_Abstract', YAF_ERR_TYPE_ERROR);
 						return false;
 					}
 				}
@@ -866,16 +884,16 @@ final class Yaf_Dispatcher
 						if ($class instanceof Yaf_Action_Abstract) {
 							return $class;
 						} else {
-							throw new Yaf_Exception_TypeError('Action ' . $class . ' must extends from Yaf_Action_Abstract');
+							yaf_trigger_error('Action ' . $class . ' must extends from Yaf_Action_Abstract', YAF_ERR_TYPE_ERROR);
 						}
 					} else {
-						throw new Yaf_Exception_LoadFailed_Action('Could not find action ' . $action . ' in '. $action_path);
+						yaf_trigger_error('Could not find action ' . $action . ' in '. $action_path, YAF_ERR_NOTFOUND_ACTION);
 					}
 				} else {
-					throw new Yaf_Exception_LoadFailed_Action('Failed opening action script ' . $action_path. ':'. YAF_ERR_NOTFOUND_ACTION);
+					yaf_trigger_error('Failed opening action script ' . $action_path. ':'. YAF_ERR_NOTFOUND_ACTION, YAF_ERR_NOTFOUND_ACTION);
 				}
 			} else {
-				throw new Yaf_Exception_LoadFailed_Action('There is no method ' . $action . 'Action in ' . get_class($controller) . '::actions');
+				yaf_trigger_error('There is no method ' . $action . 'Action in ' . get_class($controller) . '::actions', YAF_ERR_NOTFOUND_ACTION);
 			}
 		} else
 /* {{{ This only effects internally */
@@ -900,13 +918,13 @@ final class Yaf_Dispatcher
 
 			if (!class_exists($class, false)) {
 				if (!$this->_internal_autoload($action, $directory, $file_path)) {
-					throw new Yaf_Exception_LoadFailed_Action('Failed opening action script ' . $file_path . ':' . YAF_ERR_NOTFOUND_ACTION);
+					yaf_trigger_error('Failed opening action script ' . $file_path . ':' . YAF_ERR_NOTFOUND_ACTION, YAF_ERR_NOTFOUND_ACTION);
 					return false;
 				} elseif(!class_exists($class, false)) {
-					throw new Yaf_Exception_LoadFailed('Could not find class ' . $class . ' in action script ' . $file_path);
+					yaf_trigger_error('Could not find class ' . $class . ' in action script ' . $file_path, YAF_ERR_AUTOLOAD_FAILED);
 					return false;
 				} elseif(!($class instanceof Yaf_Action_Abstract)) {
-					throw new Yaf_Exception_TypeError('Action must be an instance of Yaf_Action_Abstract');
+					yaf_trigger_error('Action must be an instance of Yaf_Action_Abstract', YAF_ERR_TYPE_ERROR);
 					return false;
 				}
 			}
@@ -915,7 +933,7 @@ final class Yaf_Dispatcher
 		} else
 /* }}} */
 		{
-			throw new Yaf_Exception_LoadFailed_Action('There is no method ' . $action . 'Action in ' . get_class($controller));
+			yaf_trigger_error('There is no method ' . $action . 'Action in ' . get_class($controller), YAF_ERR_NOTFOUND_ACTION);
 		}
 
 		return false;

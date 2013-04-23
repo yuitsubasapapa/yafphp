@@ -29,7 +29,7 @@ class Yaf_View_Simple implements Yaf_View_Interface
 			if ($tpl_dir = realpath($tpl_dir)) {
 				$this->_tpl_dir = $tpl_dir;
 			} else {
-				throw new Yaf_Exception_TypeError('Expects an absolute path for templates directory');
+				yaf_trigger_error('Expects an absolute path for templates directory', YAF_ERR_TYPE_ERROR);
 				return false;
 			}
 		}
@@ -140,13 +140,13 @@ class Yaf_View_Simple implements Yaf_View_Interface
 		if ($tpl_path = realpath($tpl_file)) {
 			if (Yaf_loader::import($tpl_path) == false) {
 				ob_end_clean();
-				throw new Yaf_Exception_LoadFailed_View('Failed opening template ' . $tpl_path . ':' . YAF_ERR_NOTFOUND_VIEW);
+				yaf_trigger_error('Failed opening template ' . $tpl_path . ':' . YAF_ERR_NOTFOUND_VIEW, YAF_ERR_NOTFOUND_VIEW);
 				return false;
 			}
 		} else {
 			if (!is_string($this->_tpl_dir)) {
 				ob_end_clean();
-				throw new Yaf_Exception_LoadFailed_View('Could not determine the view script path, you should call Yaf_View_Simple::setScriptPath to specific it');
+				yaf_trigger_error('Could not determine the view script path, you should call Yaf_View_Simple::setScriptPath to specific it', YAF_ERR_NOTFOUND_VIEW);
 				return false;
 			} else {
 				$tpl_path = $this->_tpl_dir . '/' . $tpl_file;
@@ -154,7 +154,7 @@ class Yaf_View_Simple implements Yaf_View_Interface
 
 			if (Yaf_loader::import($tpl_path) == false) {
 				ob_end_clean();
-				throw new Yaf_Exception_LoadFailed_View('Failed opening template ' . $tpl_path . ':' . YAF_ERR_NOTFOUND_VIEW);
+				yaf_trigger_error('Failed opening template ' . $tpl_path . ':' . YAF_ERR_NOTFOUND_VIEW, YAF_ERR_NOTFOUND_VIEW);
 				return false;
 			}
 		}
@@ -220,19 +220,19 @@ class Yaf_View_Simple implements Yaf_View_Interface
 
 		if ($tpl_path = realpath($tpl_file)) {
 			if (Yaf_loader::import($tpl_path) == false) {
-				throw new Yaf_Exception_LoadFailed_View('Failed opening template ' . $tpl_path . ':' . YAF_ERR_NOTFOUND_VIEW);
+				yaf_trigger_error('Failed opening template ' . $tpl_path . ':' . YAF_ERR_NOTFOUND_VIEW, YAF_ERR_NOTFOUND_VIEW);
 				return false;
 			}
 		} else {
 			if (!is_string($this->_tpl_dir)) {
-				throw new Yaf_Exception_LoadFailed_View('Could not determine the view script path, you should call Yaf_View_Simple::setScriptPath to specific it');
+				yaf_trigger_error('Could not determine the view script path, you should call Yaf_View_Simple::setScriptPath to specific it', YAF_ERR_NOTFOUND_VIEW);
 				return false;
 			} else {
 				$tpl_path = $this->_tpl_dir . '/' . $tpl_file;
 			}
 
 			if (Yaf_loader::import($tpl_path) == false) {
-				throw new Yaf_Exception_LoadFailed_View('Failed opening template ' . $tpl_path . ':' . YAF_ERR_NOTFOUND_VIEW);
+				yaf_trigger_error('Failed opening template ' . $tpl_path . ':' . YAF_ERR_NOTFOUND_VIEW, YAF_ERR_NOTFOUND_VIEW);
 				return false;
 			}
 		}
