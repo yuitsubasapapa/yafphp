@@ -16,7 +16,7 @@ final class Yaf_Route_Simple implements Yaf_Route_Interface
 	protected $action;
 
 	/**
-	 * route
+	 * __construct
 	 *
 	 * @param string $module
 	 * @param string $controller
