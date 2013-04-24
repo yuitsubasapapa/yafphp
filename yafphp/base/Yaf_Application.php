@@ -35,7 +35,7 @@ final class Yaf_Application
 
 		if (!is_null(self::$_app)) {
 			unset($this);
-			yaf_trigger_error('Only one application can be initialized', YAF_ERR_STARTUP_FAILED);
+			$this->_trigger_error('Only one application can be initialized');
 			return false;
 		}
 
@@ -56,7 +56,7 @@ final class Yaf_Application
 				|| !($this->config instanceof Yaf_Config_Abstract)
 				|| $this->_parse_option() == false) {
 			unset($this);
-			yaf_trigger_error('Initialization of application config failed', YAF_ERR_STARTUP_FAILED);
+			$this->_trigger_error('Initialization of application config failed');
 			return false;
 		}
 
@@ -65,7 +65,7 @@ final class Yaf_Application
 		YAF_G('base_uri', null);
 
 		if(!$request){
-			yaf_trigger_error('Initialization of request failed', YAF_ERR_STARTUP_FAILED);
+			$this->_trigger_error('Initialization of request failed');
 			return false;
 		}
 
@@ -75,7 +75,7 @@ final class Yaf_Application
 				|| !is_object($this->dispatcher)
 				|| !($this->dispatcher instanceof Yaf_Dispatcher)) {
 			unset($this);
-			yaf_trigger_error('Instantiation of application dispatcher failed', YAF_ERR_STARTUP_FAILED);
+			$this->_trigger_error('Instantiation of application dispatcher failed');
 			return false;
 		}
 		$this->dispatcher->setRequest($request);
@@ -91,7 +91,7 @@ final class Yaf_Application
 
 		if (!$loader) {
 			unset($this);
-			yaf_trigger_error('Initialization of application auto loader failed', YAF_ERR_STARTUP_FAILED);
+			$this->_trigger_error('Initialization of application auto loader failed');
 			return false;
 		}
 
@@ -116,7 +116,7 @@ final class Yaf_Application
 	public function run()
 	{
 		if (is_bool($this->_running) && $this->_running) {
-			yaf_trigger_error('An application instance already run', YAF_ERR_STARTUP_FAILED);
+			$this->_trigger_error('An application instance already run');
 			return true;
 		}
 		$this->_running = true;
@@ -403,19 +403,19 @@ final class Yaf_Application
 		if (!isset($config->application)) {
 			/* For back compatibilty */
 			if (!isset($config->yaf)) {
-				yaf_trigger_error('Expected an array of application configure', YAF_ERR_TYPE_ERROR);
+				$this->_trigger_error('Expected an array of application configure', YAF_ERR_TYPE_ERROR);
 				return false;
 			}
 		}
 
 		$app = isset($config->application) ? $config->application : $config->yaf;
 		if (!($app instanceof Yaf_Config_Abstract)) {
-			yaf_trigger_error('Expected an array of application configure', YAF_ERR_TYPE_ERROR);
+			$this->_trigger_error('Expected an array of application configure', YAF_ERR_TYPE_ERROR);
 			return false;
 		}
 
 		if (!isset($app->directory)) {
-			yaf_trigger_error('Expected a directory entry in application configures', YAF_ERR_STARTUP_FAILED);
+			$this->_trigger_error('Expected a directory entry in application configures');
 			return false;
 		}
 
@@ -509,6 +509,33 @@ final class Yaf_Application
 		}
 
 		return true;
+	}
+
+	/**
+	 * yaf_trigger_error
+	 * 
+	 * @param string $message
+	 * @param integer $code
+	 */
+	function _trigger_error($message, $code = YAF_ERR_STARTUP_FAILED)
+	{
+		if (YAF_G('throw_exception')) {
+			switch ($code) {
+				case YAF_ERR_STARTUP_FAILED:
+					throw new Yaf_Exception_StartupError($message);
+					break;
+				case YAF_ERR_TYPE_ERROR:
+					throw new Yaf_Exception_TypeError($message);
+					break;
+				default:
+					throw new Yaf_Exception($message, $code);
+					break;
+			}
+		} else {
+			$this->_err_no = $code;
+			$this->_err_msg = $message;
+			trigger_error($message, E_USER_NOTICE);
+		}
 	}
 
 }

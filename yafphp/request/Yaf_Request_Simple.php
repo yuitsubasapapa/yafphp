@@ -27,7 +27,7 @@ final class Yaf_Request_Simple extends Yaf_Request_Abstract
 	{
 		if ($params && !is_array($params)) {
 			unset($this);
-			yaf_trigger_error('Expects the params is an array', YAF_ERR_TYPE_ERROR);
+			trigger_error('Expects the params is an array', E_USER_ERROR);
 			return false;
 		}
 

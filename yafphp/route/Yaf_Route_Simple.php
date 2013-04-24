@@ -16,7 +16,7 @@ final class Yaf_Route_Simple implements Yaf_Route_Interface
 	protected $action;
 
 	/**
-	 * route
+	 * __construct
 	 *
 	 * @param string $module
 	 * @param string $controller
@@ -29,7 +29,7 @@ final class Yaf_Route_Simple implements Yaf_Route_Interface
 			$this->controller = $controller;
 			$this->action = $action;
 		} else {
-			yaf_trigger_error('Expect 3 string paramsters', YAF_ERR_TYPE_ERROR);
+			trigger_error('Expect 3 string paramsters', E_USER_ERROR);
 		}
 	}
 

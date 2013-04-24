@@ -25,7 +25,7 @@ final class Yaf_Config_Simple extends Yaf_Config_Abstract
 				$this->_readonly = (boolean) $readonly;
 			}
 		} else {
-			yaf_trigger_error('Invalid parameters provided, must be an array', YAF_ERR_TYPE_ERROR);
+			trigger_error('Invalid parameters provided, must be an array', E_USER_ERROR);
 			return false;
 		}
 	}

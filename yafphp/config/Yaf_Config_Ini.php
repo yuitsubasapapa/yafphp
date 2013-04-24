@@ -26,19 +26,19 @@ final class Yaf_Config_Ini extends Yaf_Config_Abstract
 				if (is_file($config)) {
 					$this->_config = self::_parser_cb($config, $section);
 					if ($this->_config == false || !is_array($this->_config)) {
-						yaf_trigger_error('Parsing ini file '. $config .' failed', E_USER_ERROR);
+						trigger_error('Parsing ini file '. $config .' failed', E_USER_ERROR);
 						return false;
 					}
 				} else {
-					yaf_trigger_error('Argument is not a valid ini file '. $config, E_USER_ERROR);
+					trigger_error('Argument is not a valid ini file '. $config, E_USER_ERROR);
 					return false;
 				}
 			} else {
-				yaf_trigger_error('Unable to find config file '. $config, E_USER_ERROR);
+				trigger_error('Unable to find config file '. $config, E_USER_ERROR);
 				return false;
 			}
 		} else {
-			yaf_trigger_error('Invalid parameters provided, must be path of ini file', YAF_ERR_TYPE_ERROR);
+			trigger_error('Invalid parameters provided, must be path of ini file', E_USER_ERROR);
 			return false;
 		}
 	}
