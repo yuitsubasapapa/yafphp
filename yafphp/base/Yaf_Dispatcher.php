@@ -822,6 +822,8 @@ final class Yaf_Dispatcher
 		}
 
 		if ($directory) {
+			$controller = ucfirst(strtolower($controller));
+			
 			if (YAF_NAME_SUFFIX) {
 				$class = $controller . YAF_NAME_SEPARATOR . 'Controller';
 			} else {
