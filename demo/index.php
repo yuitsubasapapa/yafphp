@@ -1,7 +1,7 @@
 <?php
 error_reporting(E_ALL);
 ini_set('display_errors', 'On');
-defined('YAF_DEBUG') or define('YAF_DEBUG', true);
+defined('YAF_DEBUG') or define('YAF_DEBUG', false);
 
 date_default_timezone_set('Asia/Shanghai');
 

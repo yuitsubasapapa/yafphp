@@ -131,7 +131,7 @@ class Yaf_View_Simple implements Yaf_View_Interface
 		if (!is_array($this->_options)
 				|| !isset($this->_options['short_tags'])
 				|| $this->_options['short_tags'] == true) {
-			ini_set('short_open_tag', 1);
+			ini_set('short_open_tag', 'On');
 		}
 
 		// ob_start
@@ -225,7 +225,7 @@ class Yaf_View_Simple implements Yaf_View_Interface
 		if (!is_array($this->_options)
 				|| !isset($this->_options['short_tags'])
 				|| $this->_options['short_tags'] == true) {
-			ini_set('short_open_tag', 1);
+			ini_set('short_open_tag', 'On');
 		}
 
 		if ($this->_tmp_path = realpath($tpl_file)) {
