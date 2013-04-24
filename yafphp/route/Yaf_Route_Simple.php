@@ -41,22 +41,26 @@ final class Yaf_Route_Simple implements Yaf_Route_Interface
 	 */
 	public function route($request)
 	{
-		$module = $request->getQuery($this->module);
-		$controller = $request->getQuery($this->controller);
-		$action = $request->getQuery($this->action);
+		if (is_object($request) && ($request instanceof Yaf_Request_Abstract)) {
+			$module = $request->getQuery($this->module);
+			$controller = $request->getQuery($this->controller);
+			$action = $request->getQuery($this->action);
 
-		if (is_null($module) && is_null($controller) && is_null($action)) {
-			return false;
+			if (is_null($module) && is_null($controller) && is_null($action)) {
+				return false;
+			}
+
+			if ($module && $this->_is_module_name($module)) {
+				$request->setModuleName($module);
+			}
+
+			$request->setControllerName((string)$controller);
+			$request->setActionName((string)$action);
+
+			return true;
 		}
 
-		if ($module && $this->_is_module_name($module)) {
-			$request->setModuleName($module);
-		}
-
-		$request->setControllerName((string)$controller);
-		$request->setActionName((string)$action);
-
-		return true;
+		return false;
 	}
 
 	/**

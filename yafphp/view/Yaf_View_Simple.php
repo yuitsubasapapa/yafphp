@@ -15,6 +15,9 @@ class Yaf_View_Simple implements Yaf_View_Interface
 	protected $_tpl_dir;
 	protected $_options;
 
+	private $_tmp_vars;
+	private $_tmp_path;
+
 	/**
 	 * __construct
 	 *
@@ -103,6 +106,7 @@ class Yaf_View_Simple implements Yaf_View_Interface
 	public function render($tpl_file, $tpl_vars = null)
 	{
 		// yaf_view_simple_extract
+		$this->_tmp_vars = array();
 		if (is_array($this->_tpl_vars)) {
 			foreach ($this->_tpl_vars as $key => $value) {
 				if (strtoupper($key) == 'GLOBALS' || strtolower($key) == 'this') {
@@ -110,9 +114,8 @@ class Yaf_View_Simple implements Yaf_View_Interface
 					continue;
 				}
 			}
-			extract($this->_tpl_vars);
+			$this->_tmp_vars = array_merge($this->_tmp_vars, $this->_tpl_vars);
 		}
-		
 		if (is_array($tpl_vars)) {
 			foreach ($tpl_vars as $key => $value) {
 				if (strtoupper($key) == 'GLOBALS' || strtolower($key) == 'this') {
@@ -120,7 +123,7 @@ class Yaf_View_Simple implements Yaf_View_Interface
 					continue;
 				}
 			}
-			extract($tpl_vars);
+			$this->_tmp_vars = array_merge($this->_tmp_vars, $tpl_vars);
 		}
 
 		// short_tags
@@ -137,8 +140,8 @@ class Yaf_View_Simple implements Yaf_View_Interface
 			return false;
 		}
 
-		if ($tpl_path = realpath($tpl_file)) {
-			if (Yaf_loader::import($tpl_path) == false) {
+		if ($this->_tmp_path = realpath($tpl_file)) {
+			if ($this->_loader_import() == false) {
 				ob_end_clean();
 				$this->_trigger_error('Failed opening template ' . $tpl_path . ':' . YAF_ERR_NOTFOUND_VIEW);
 				return false;
@@ -149,10 +152,10 @@ class Yaf_View_Simple implements Yaf_View_Interface
 				$this->_trigger_error('Could not determine the view script path, you should call Yaf_View_Simple::setScriptPath to specific it');
 				return false;
 			} else {
-				$tpl_path = $this->_tpl_dir . '/' . $tpl_file;
+				$this->_tmp_path = $this->_tpl_dir . '/' . $tpl_file;
 			}
 
-			if (Yaf_loader::import($tpl_path) == false) {
+			if ($this->_loader_import() == false) {
 				ob_end_clean();
 				$this->_trigger_error('Failed opening template ' . $tpl_path . ':' . YAF_ERR_NOTFOUND_VIEW);
 				return false;
@@ -160,7 +163,9 @@ class Yaf_View_Simple implements Yaf_View_Interface
 		}
 
 		ini_set('short_open_tag', $short_open_tag);
-
+		$this->_tmp_vars = array();
+		$this->_tmp_path = null;
+		
 		if (($content = ob_get_contents()) === false) {
 			trigger_error('Unable to fetch ob content', E_USER_WARNING);
 			return false;
@@ -195,20 +200,25 @@ class Yaf_View_Simple implements Yaf_View_Interface
 	public function display($tpl_file, $tpl_vars = null)
 	{
 		// yaf_view_simple_extract
-		foreach ($this->_tpl_vars as $key => $value) {
-			if (strtoupper($key) == 'GLOBALS' || strtolower($key) == 'this') {
-				unset($this->_tpl_vars[$key]);
-				continue;
+		$this->_tmp_vars = array();
+		if (is_array($this->_tpl_vars)) {
+			foreach ($this->_tpl_vars as $key => $value) {
+				if (strtoupper($key) == 'GLOBALS' || strtolower($key) == 'this') {
+					unset($this->_tpl_vars[$key]);
+					continue;
+				}
 			}
+			$this->_tmp_vars = array_merge($this->_tmp_vars, $this->_tpl_vars);
 		}
-		extract($this->_tpl_vars);
-		foreach ($tpl_vars as $key => $value) {
-			if (strtoupper($key) == 'GLOBALS' || strtolower($key) == 'this') {
-				unset($tpl_vars[$key]);
-				continue;
+		if (is_array($tpl_vars)) {
+			foreach ($tpl_vars as $key => $value) {
+				if (strtoupper($key) == 'GLOBALS' || strtolower($key) == 'this') {
+					unset($tpl_vars[$key]);
+					continue;
+				}
 			}
+			$this->_tmp_vars = array_merge($this->_tmp_vars, $tpl_vars);
 		}
-		extract($tpl_vars);
 
 		// short_tags
 		$short_open_tag = ini_get('short_open_tag');
@@ -218,8 +228,8 @@ class Yaf_View_Simple implements Yaf_View_Interface
 			ini_set('short_open_tag', 1);
 		}
 
-		if ($tpl_path = realpath($tpl_file)) {
-			if (Yaf_loader::import($tpl_path) == false) {
+		if ($this->_tmp_path = realpath($tpl_file)) {
+			if ($this->_loader_import() == false) {
 				$this->_trigger_error('Failed opening template ' . $tpl_path . ':' . YAF_ERR_NOTFOUND_VIEW);
 				return false;
 			}
@@ -228,17 +238,18 @@ class Yaf_View_Simple implements Yaf_View_Interface
 				$this->_trigger_error('Could not determine the view script path, you should call Yaf_View_Simple::setScriptPath to specific it');
 				return false;
 			} else {
-				$tpl_path = $this->_tpl_dir . '/' . $tpl_file;
+				$this->_tmp_path = $this->_tpl_dir . '/' . $tpl_file;
 			}
 
-			if (Yaf_loader::import($tpl_path) == false) {
+			if ($this->_loader_import() == false) {
 				$this->_trigger_error('Failed opening template ' . $tpl_path . ':' . YAF_ERR_NOTFOUND_VIEW);
 				return false;
 			}
 		}
 
 		ini_set('short_open_tag', $short_open_tag);
-
+		$this->_tmp_vars = array();
+		$this->_tmp_path = null;
 		return true;
 	}
 
@@ -327,12 +338,28 @@ class Yaf_View_Simple implements Yaf_View_Interface
 	}
 
 	/**
+	 * yaf_loader_import
+	 * 
+	 * @param void
+	 * @return boolean
+	 */
+	private function _loader_import()
+	{
+		if (is_file($this->_tmp_path) && is_readable($this->_tmp_path)) {
+			extract($this->_tpl_vars);
+			include($this->_tmp_path);
+			return true;
+		}
+		return false;
+	}
+
+	/**
 	 * yaf_trigger_error
 	 * 
 	 * @param string $message
 	 * @param integer $code
 	 */
-	function _trigger_error($message, $code = YAF_ERR_NOTFOUND_VIEW)
+	private function _trigger_error($message, $code = YAF_ERR_NOTFOUND_VIEW)
 	{
 		if (YAF_G('throw_exception')) {
 			switch ($code) {

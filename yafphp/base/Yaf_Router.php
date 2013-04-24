@@ -173,22 +173,22 @@ final class Yaf_Router
 		}
 
 		if (strtolower($config['type']) == 'rewrite') {
-			if (empty($config['match']) || !is_string($config['match'])) {
+			if (!isset($config['match']) || !is_string($config['match'])) {
 				return null;
 			}
-			if (empty($config['route']) || !is_array($config['route'])) {
+			if (!isset($config['route']) || !is_array($config['route'])) {
 				return null;
 			}
 
 			return new Yaf_Route_Rewrite($config['match'], $config['route']);
 		} elseif (strtolower($config['type']) == 'regex') {
-			if (empty($config['match']) || !is_string($config['match'])) {
+			if (!isset($config['match']) || !is_string($config['match'])) {
 				return null;
 			}
-			if (empty($config['route']) || !is_array($config['route'])) {
+			if (!isset($config['route']) || !is_array($config['route'])) {
 				return null;
 			}
-			if (empty($config['map']) || !is_array($config['map'])) {
+			if (!isset($config['map']) || !is_array($config['map'])) {
 				return null;
 			}
 

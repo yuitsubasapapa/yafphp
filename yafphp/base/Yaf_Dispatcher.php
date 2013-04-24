@@ -34,9 +34,9 @@ final class Yaf_Dispatcher
 	private function __construct()
 	{
 		$this->_router = new Yaf_Router();
-		$this->_default_module = YAF_G('default_module');
-		$this->_default_controller = YAF_G('default_controller');
-		$this->_default_action = YAF_G('default_action');
+		$this->_default_module = ucfirst(YAF_G('default_module'));
+		$this->_default_controller = ucfirst(YAF_G('default_controller'));
+		$this->_default_action = strtolower(YAF_G('default_action'));
 
 		self::$_instance = $this;
 	}
@@ -212,7 +212,7 @@ final class Yaf_Dispatcher
 	{
 		if ($module_name && is_string($module_name)
 				&& $this->_is_module_name($module_name)) {
-			$this->_default_module = ucfirst(strtolower($module_name));
+			$this->_default_module = ucfirst($module_name);
 			return $this;
 		}
 		return false;
@@ -227,7 +227,7 @@ final class Yaf_Dispatcher
 	public function setDefaultController($controller_name)
 	{
 		if ($controller_name && is_string($controller_name)) {
-			$this->_default_controller = ucfirst(strtolower($controller_name));
+			$this->_default_controller = ucfirst($controller_name);
 			return $this;
 		}
 		return false;
@@ -623,7 +623,7 @@ final class Yaf_Dispatcher
 		// module
 		$module = $request->getModuleName();
 		if ($module && is_string($module)) {
-			$request->setModuleName(strtolower($module));
+			$request->setModuleName(ucfirst($module));
 		} else {
 			$request->setModuleName($this->_default_module);
 		}
@@ -822,7 +822,7 @@ final class Yaf_Dispatcher
 		}
 
 		if ($directory) {
-			$controller = ucfirst(strtolower($controller));
+			$controller = ucfirst($controller);
 			
 			if (YAF_NAME_SUFFIX) {
 				$class = $controller . YAF_NAME_SEPARATOR . 'Controller';
@@ -874,7 +874,7 @@ final class Yaf_Dispatcher
 				$action_path = $app_dir . '/' . $controller->actions[$action];
 
 				if (Yaf_Loader::import($action_path)) {
-					$action = ucfirst(strtolower($action));
+					$action = ucfirst($action);
 
 					if (YAF_NAME_SUFFIX) {
 						$class = $action . YAF_NAME_SEPARATOR . 'Action';
@@ -1011,7 +1011,7 @@ final class Yaf_Dispatcher
 	 * @param string $message
 	 * @param integer $code
 	 */
-	function _trigger_error($message, $code = 0)
+	private function _trigger_error($message, $code = 0)
 	{
 		if (YAF_G('throw_exception')) {
 			switch ($code) {

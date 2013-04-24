@@ -351,7 +351,11 @@ final class Yaf_Application
 	 */
 	public function __destruct()
 	{
-		
+		// runtime
+		if (YAF_DEBUG) {
+			$runtime = round((microtime(true) - YAF_RUNTIME) * 1000, 2);
+			echo '<hr>[' . $runtime . 'ms]';
+		}
 	}
 
 	/**
@@ -517,7 +521,7 @@ final class Yaf_Application
 	 * @param string $message
 	 * @param integer $code
 	 */
-	function _trigger_error($message, $code = YAF_ERR_STARTUP_FAILED)
+	private function _trigger_error($message, $code = YAF_ERR_STARTUP_FAILED)
 	{
 		if (YAF_G('throw_exception')) {
 			switch ($code) {
