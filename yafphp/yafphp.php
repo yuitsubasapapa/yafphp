@@ -13,7 +13,7 @@
 defined('YAF_RUNTIME') or define('YAF_RUNTIME', microtime(true));
 
 // yafphp constant
-define('YAF_VERSION', '2.2.0');
+define('YAF_VERSION', '1.2.2');
 define('YAF_ERR_STARTUP_FAILED', 512);
 define('YAF_ERR_ROUTE_FAILED', 513);
 define('YAF_ERR_DISPATCH_FAILED', 514);
