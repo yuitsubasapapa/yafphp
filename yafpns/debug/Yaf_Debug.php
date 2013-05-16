@@ -9,7 +9,9 @@
 // | Author: baoqiang <zmrnet@qq.com>
 // +----------------------------------------------------------------------
 
-final class Yaf_Debug
+namespace Yaf;
+
+final class Yaf\Debug
 {
 	protected static $_runtime = array();
 	protected static $_runlogs = array();
