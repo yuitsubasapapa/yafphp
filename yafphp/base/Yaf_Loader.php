@@ -299,7 +299,7 @@ final class Yaf_Loader
 	 * @param boolean $global
 	 * @return Yaf_Loader
 	 */
-	public static function setLibraryPath($path, $global = false)
+	public function setLibraryPath($path, $global = false)
 	{
 		if (!$global) {
 			$this->_library_directory = $path;
@@ -314,7 +314,7 @@ final class Yaf_Loader
 	 * @param boolean $global
 	 * @return string
 	 */
-	public static function getLibraryPath($global = false)
+	public function getLibraryPath($global = false)
 	{
 		if (!$global) {
 			return $this->_library_directory;
