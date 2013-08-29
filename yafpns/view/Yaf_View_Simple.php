@@ -145,7 +145,7 @@ class View_Simple implements View_Interface
 		if ($this->_tmp_path = realpath($tpl_file)) {
 			if ($this->_loader_import() == false) {
 				ob_end_clean();
-				$this->_trigger_error('Failed opening template ' . $tpl_path . ':' . YAF_ERR_NOTFOUND_VIEW);
+				$this->_trigger_error('Failed opening template ' . $tpl_file . ':' . YAF_ERR_NOTFOUND_VIEW);
 				return false;
 			}
 		} else {
@@ -159,7 +159,7 @@ class View_Simple implements View_Interface
 
 			if ($this->_loader_import() == false) {
 				ob_end_clean();
-				$this->_trigger_error('Failed opening template ' . $tpl_path . ':' . YAF_ERR_NOTFOUND_VIEW);
+				$this->_trigger_error('Failed opening template ' . $tpl_file . ':' . YAF_ERR_NOTFOUND_VIEW);
 				return false;
 			}
 		}

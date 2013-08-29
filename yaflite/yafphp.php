@@ -1821,6 +1821,11 @@ final class Yaf_Dispatcher
 									return false;
 								}
 							} catch(Exception $e) {
+								if (YAF_G('catch_exception')) {
+									$this->_exception_handler($request, $response, $e);
+								} else {
+									$this->_trigger_error($e->getMessage(), $e->getCode());
+								}
 								return false;
 							}
 
@@ -1833,6 +1838,11 @@ final class Yaf_Dispatcher
 									return false;
 								}
 							} catch(Exception $e) {
+								if (YAF_G('catch_exception')) {
+									$this->_exception_handler($request, $response, $e);
+								} else {
+									$this->_trigger_error($e->getMessage(), $e->getCode());
+								}
 								return false;
 							}
 						}
@@ -2138,18 +2148,10 @@ abstract class Yaf_Controller_Abstract
 	{
 		if ($action && is_string($action)) {
 			$tpl_file = str_replace('_', '/', strtolower($this->_name) . '/' . $action) . '.' . YAF_G('view_ext');
-			try {
-				if (is_array($tpl_vars)) {
-					$content = call_user_func(array($this->_view, 'render'), $tpl_file, $tpl_vars);
-				} else {
-					$content = call_user_func(array($this->_view, 'render'), $tpl_file);
-				}
-
-				if (!$content) {
-					return null;
-				}
-			} catch (Exception $e) {
-				return null;
+			if (is_array($tpl_vars)) {
+				$content = call_user_func(array($this->_view, 'render'), $tpl_file, $tpl_vars);
+			} else {
+				$content = call_user_func(array($this->_view, 'render'), $tpl_file);
 			}
 
 			if ($content === false) {
@@ -2173,18 +2175,10 @@ abstract class Yaf_Controller_Abstract
 	{
 		if ($action && is_string($action)) {
 			$tpl_file = str_replace('_', '/', strtolower($this->_name) . '/' . $action) . '.' . YAF_G('view_ext');
-			try {
-				if (is_array($tpl_vars)) {
-					$content = call_user_func(array($this->_view, 'render'), $tpl_file, $tpl_vars);
-				} else {
-					$result = call_user_func(array($this->_view, 'render'), $tpl_file);
-				}
-
-				if (!$content) {
-					return false;
-				}
-			} catch (Exception $e) {
-				return false;
+			if (is_array($tpl_vars)) {
+				$content = call_user_func(array($this->_view, 'render'), $tpl_file, $tpl_vars);
+			} else {
+				$result = call_user_func(array($this->_view, 'render'), $tpl_file);
 			}
 
 			if ($content === false) {

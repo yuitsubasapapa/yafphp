@@ -35,18 +35,10 @@ abstract class Controller_Abstract
 	{
 		if ($action && is_string($action)) {
 			$tpl_file = str_replace('_', '/', strtolower($this->_name) . '/' . $action) . '.' . YAF_G('view_ext');
-			try {
-				if (is_array($tpl_vars)) {
-					$content = call_user_func(array($this->_view, 'render'), $tpl_file, $tpl_vars);
-				} else {
-					$content = call_user_func(array($this->_view, 'render'), $tpl_file);
-				}
-
-				if (!$content) {
-					return null;
-				}
-			} catch (Exception $e) {
-				return null;
+			if (is_array($tpl_vars)) {
+				$content = call_user_func(array($this->_view, 'render'), $tpl_file, $tpl_vars);
+			} else {
+				$content = call_user_func(array($this->_view, 'render'), $tpl_file);
 			}
 
 			if ($content === false) {
@@ -70,18 +62,10 @@ abstract class Controller_Abstract
 	{
 		if ($action && is_string($action)) {
 			$tpl_file = str_replace('_', '/', strtolower($this->_name) . '/' . $action) . '.' . YAF_G('view_ext');
-			try {
-				if (is_array($tpl_vars)) {
-					$content = call_user_func(array($this->_view, 'render'), $tpl_file, $tpl_vars);
-				} else {
-					$result = call_user_func(array($this->_view, 'render'), $tpl_file);
-				}
-
-				if (!$content) {
-					return false;
-				}
-			} catch (Exception $e) {
-				return false;
+			if (is_array($tpl_vars)) {
+				$content = call_user_func(array($this->_view, 'render'), $tpl_file, $tpl_vars);
+			} else {
+				$content = call_user_func(array($this->_view, 'render'), $tpl_file);
 			}
 
 			if ($content === false) {

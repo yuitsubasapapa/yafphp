@@ -781,6 +781,11 @@ final class Dispatcher
 									return false;
 								}
 							} catch(Exception $e) {
+								if (YAF_G('catch_exception')) {
+									$this->_exception_handler($request, $response, $e);
+								} else {
+									$this->_trigger_error($e->getMessage(), $e->getCode());
+								}
 								return false;
 							}
 
@@ -793,6 +798,11 @@ final class Dispatcher
 									return false;
 								}
 							} catch(Exception $e) {
+								if (YAF_G('catch_exception')) {
+									$this->_exception_handler($request, $response, $e);
+								} else {
+									$this->_trigger_error($e->getMessage(), $e->getCode());
+								}
 								return false;
 							}
 						}
