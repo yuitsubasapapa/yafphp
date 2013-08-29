@@ -74,8 +74,8 @@ final class Loader
 		$separator_len = strlen(YAF_NAME_SEPARATOR);
 		$app_directory = YAF_G('directory');
 		$origin_classname = $class_name;
-		$file_name = '';
-		$directory = '';
+		$file_name = $class_name;
+		$directory = null;
 
 		do {
 			if (empty($class_name)){
@@ -180,11 +180,12 @@ final class Loader
 	public static function getInstance($library = null, $global_library = null)
 	{
 		if (!(self::$_instance instanceof self)) {
-			if ((is_null($library) && is_null($global_library))
-					|| (empty($library) && empty($global_library))
-				){
+			if (empty($library) && empty($global_library)){
 				return;
 			}
+
+			if (empty($library)) $library = $global_library;
+			if (empty($global_library)) $global_library = $library;
 
 			self::$_instance = new self();
 		}
@@ -371,13 +372,13 @@ final class Loader
 				return false;
 			} else {
 				if ($loader->isLocalName($file_name)) {
-					$library_path = $loader->getLibraryPath();
+					$directory = $loader->getLibraryPath();
 				} else {
-					$library_path = $loader->getLibraryPath(true);
+					$directory = $loader->getLibraryPath(true);
 				}
 			}
 
-			if (empty($library_path)) {
+			if (empty($directory)) {
 				trigger_error('Yaf\Loader requires Yaf\Application(which set the library_directory) to be initialized first', E_USER_WARNING);
 				return false;
 			}
