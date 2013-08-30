@@ -769,7 +769,7 @@ final class Yaf_Dispatcher
 					if (property_exists($executor, 'yafAutoRender')) {
 						$auto_render = (boolean)$executor->yafAutoRender;
 					} else {
-						$auto_render = (boolean)$this->_router;
+						$auto_render = (boolean)$this->_render;
 					}
 
 					if ($auto_render) {
