@@ -189,8 +189,8 @@ final class Request_Simple extends Request_Abstract
 	 */	
 	public function get($name, $default = null)
 	{
-		if (isset($this->_params[$name])) {
-			return $this->_params[$name];
+		if (isset($this->params[$name])) {
+			return $this->params[$name];
 		} elseif (isset($_POST[$name])) {
 			return $_POST[$name];
 		} elseif (isset($_GET[$name])) {

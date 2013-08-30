@@ -5396,8 +5396,8 @@ if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
 	 */	
 	public function get($name, $default = null)
 	{
-		if (isset($this->_params[$name])) {
-			return $this->_params[$name];
+		if (isset($this->params[$name])) {
+			return $this->params[$name];
 		} elseif (isset($_POST[$name])) {
 			return $_POST[$name];
 		} elseif (isset($_GET[$name])) {
@@ -5620,8 +5620,8 @@ final class Yaf_Request_Simple extends Yaf_Request_Abstract
 	 */	
 	public function get($name, $default = null)
 	{
-		if (isset($this->_params[$name])) {
-			return $this->_params[$name];
+		if (isset($this->params[$name])) {
+			return $this->params[$name];
 		} elseif (isset($_POST[$name])) {
 			return $_POST[$name];
 		} elseif (isset($_GET[$name])) {
